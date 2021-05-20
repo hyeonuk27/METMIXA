@@ -11,10 +11,18 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class MovieListSerializer(serializers.ModelSerializer):
-   
-   class Meta:
-       model = Movie
-       fields = ('title', 'poster_path', 'tmdb_id',)
+    
+    class Meta:
+        model = Movie
+        fields = (
+            'tmdb_id',
+            'title',
+            'tmdb_vote_sum', 
+            'tmdb_vote_cnt', 
+            'our_vote_sum', 
+            'our_vote_cnt',
+            'poster_path', 
+        )
 
 
 class MovieSerializer(serializers.ModelSerializer):
@@ -22,7 +30,23 @@ class MovieSerializer(serializers.ModelSerializer):
     reviews_count = serializers.IntegerField(source='reviews.count', read_only=True)
     class Meta:
         model = Movie
-        fiedls = ('tmdb_id', 'title', 'overview', 'release_date', 'poster_path', 'backdrop_path', 'popularity', 'vote_average', 'genres', 'reviews', 'reviews_count')
+        fields = (
+            'tmdb_id', 
+            'title',
+            'original_title',
+            'release_date',
+            'popularity',
+            'tmdb_vote_sum', 
+            'tmdb_vote_cnt', 
+            'our_vote_sum', 
+            'our_vote_cnt',
+            'overview', 
+            'poster_path', 
+            'backdrop_path', 
+            'genres', 
+            'reviews', 
+            'reviews_count'
+        )
 
 
 class GenreSerializer(serializers.ModelSerializer):

@@ -6,12 +6,13 @@ User = settings.AUTH_USER_MODEL
 
 # 장르
 class Genre(models.Model):
+    tmdb_genre_id = models.IntegerField()
     name = models.CharField(max_length=50)
     recommend_users = models.ManyToManyField(User, related_name='recommend_genres')
 
 
 # 영화
-class Movie(models.Model):
+class Movie(models.Model): # 총 13개 필드
     tmdb_id = models.IntegerField()
     title = models.CharField(max_length=100)
     original_title = models.CharField(max_length=100)
@@ -24,7 +25,7 @@ class Movie(models.Model):
     overview = models.TextField()
     poster_path = models.TextField()
     backdrop_path = models.TextField()
-    genres = models.ManyToManyField(Genre)
+    genres = models.ManyToManyField(Genre, related_name='movies')
     # 커스텀한 중개 테이블을 사용하지 않는다면 사용
     # bookmark_users = models.ManyToManyField(User, related_name='my_movies')
 
