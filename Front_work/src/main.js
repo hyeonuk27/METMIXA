@@ -4,6 +4,7 @@ import AOS from 'aos'
 import 'aos/dist/aos.css'
 import VueFullPage from 'vue-fullpage.js'
 import router from './router'
+import store from './store'
 
 Vue.config.productionTip = false
 Vue.use(VueFullPage)
@@ -14,5 +15,6 @@ new Vue({
   },
 
   router,
+  store,
   render: h => h(App)
 }).$mount('#app')

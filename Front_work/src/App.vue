@@ -2,10 +2,6 @@
   <div id="app">
     <div id="nav">
       <router-link to="/">Home</router-link> |
-      <router-link to="FullPageScroll">fullpage example</router-link> |
-      <router-link to="AOS">AOS example</router-link> |
-      <router-link to="MainScroll">MainScroll example</router-link> |
-      <router-link to="AnimateOnScroll">AnimateOnScroll example</router-link> |
       <router-link to="Practice">Practice</router-link>
     </div>
     <router-view/>
