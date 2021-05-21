@@ -12,6 +12,7 @@ import requests
 from decouple import config
 import random
 from django.db.models.aggregates import Sum
+from django.core.paginator import Paginator
 
 # 인증된 사용자만 사용할 수 있도록 하는 데코레이터
 from rest_framework.decorators import authentication_classes, permission_classes
@@ -205,6 +206,9 @@ def rate(request, movie_pk):
 @permission_classes([IsAuthenticated])
 def photo_ticket_list(request):
     photo_tickets = PhotoTicket.objects.filter(user__pk=request.user.pk)
+    paginator = Paginator(photo_tickets, 12)
+    page_num = request.GET.get('page_num')
+    photo_tickets = paginator.get_page(page_num)
     serializer = PhotoTicketSerializer(photo_tickets, many=True)
     return Response(serializer.data)
 

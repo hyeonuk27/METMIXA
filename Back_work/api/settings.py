@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'imagekit',
     'django_seed',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -138,7 +139,7 @@ MEDIA_URL = '/media/'
 import datetime
 
 JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
 }
 
 STATIC_ROOT = BASE_DIR / 'my_static'

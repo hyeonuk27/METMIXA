@@ -4,6 +4,10 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import UserSerializer, UserProfileSerializer
 
+from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+
 
 @api_view(['POST'])
 def signup(request):
@@ -23,6 +27,8 @@ def signup(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
+@authentication_classes([JSONWebTokenAuthentication])
+@permission_classes([IsAuthenticated])
 def profile(request):
     if request.method == 'GET':
         serializer = UserProfileSerializer(request.user)
