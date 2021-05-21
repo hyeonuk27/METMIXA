@@ -1,7 +1,6 @@
 <template>
   <div id='MainPage'>
-  <!-- 사이트 이름 -->
-    <h1>METMIXA</h1>
+    
   </div>
 </template>
 
@@ -13,4 +12,12 @@ export default {
 
 <style>
 
+img {
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  /* Preserve aspet ratio */
+  min-width: 100%;
+  min-height: 100%;
+}
 </style>

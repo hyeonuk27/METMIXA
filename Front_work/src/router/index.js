@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Main from '@/views/Main.vue'
+import MainPage from '@/views/MainPage.vue'
 import practice from '@/views/practice.vue'
 
 Vue.use(VueRouter)
@@ -8,8 +8,8 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    name: 'Main',
-    component: Main
+    name: 'MainPage',
+    component: MainPage
   },
   {
     path: '/practice',

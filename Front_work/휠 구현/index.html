@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>MainPage</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/mouseover_style.css">
+</head>
+
+<body>
+  <figure class="snip1504">
+    <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/331810/sample57.jpg" alt="sample57" />
+    <figcaption>
+      <h3>불한당</h3>
+      <h5>이 영화는 너무 재밌습니다</h5>
+    </figcaption>
+  </figure>
+  <div class='cards '>
+  <div class='card '>
+    <div class='card-face'>
+      <img src="https://picsum.photos/id/20/1000/1000" alt="" >
+      <div class='card-label'>
+        <h3>불한당</h3>
+        <h5>이 영화는 너무 재밌습니다</h5>
+      </div>
+    </div>
+  </div>
+  <div class='card'>
+    <div class='card-face'>
+      <img src="https://picsum.photos/id/21/1000/1000" alt="" >
+      <div class='card-label'></div>
+    </div>
+  </div>
+  <div class='card'>
+    <div class='card-face'>
+      <img src="https://picsum.photos/id/35/1000/1000" alt="" >
+      <div class='card-label'></div>
+    </div>
+  </div>
+  <div class='card'>
+    <div class='card-face'>
+      <img src="https://picsum.photos/id/59/1000/1000" alt="" >
+      <div class='card-label'></div>
+    </div>
+  </div>
+  <div class='card'>
+    <div class='card-face'>
+      <img src="https://picsum.photos/id/19/1000/1000" alt="" >
+      <div class='card-label'></div>
+    </div>
+  </div>
+  <div class='card'>
+    <div class='card-face'>
+      <img src="https://picsum.photos/id/79/1000/1000" alt="" >
+      <div class='card-label'></div>
+    </div>
+  </div>
+  <div class='card'>
+    <div class='card-face'>
+      <img src="https://picsum.photos/id/18/1000/1000" alt="" >
+      <div class='card-label'></div>
+    </div>
+  </div>
+  <div class='card'>
+    <div class='card-face'>
+      <img src="https://picsum.photos/id/76/1000/1000" alt="" >
+      <div class='card-label'></div>
+    </div>
+  </div>
+  <div class='card'>
+    <div class='card-face'>
+      <img src="https://picsum.photos/id/35/1000/1000" alt="" >
+      <div class='card-label'></div>
+    </div>
+  </div>
+  <div class='card' id='wow'>
+    <div class='card-face'  >
+      <img  src="https://picsum.photos/id/25/1000/1000" alt="" >
+      <div class='card-label'></div>
+    </div>
+  </div>
+</div>
+  
+  
+<script>
+  const img1 = document.querySelector('#wow')
+  const body = document.querySelector('body')
+  const cards = document.querySelectorAll('.card')
+  console.log(cards)
+
+  function temp() {
+    cards.forEach(card => {
+      card.children[0].children[0].src= "https://picsum.photos/1000/1000"
+    })
+    // e.target.children.forEach(child => {
+    //   child.children[0].src = "https://picsum.photos/1000/1000"
+  }
+  
+  cards.forEach(card => {
+    card.addEventListener('wheel', temp)})
+  // img1.addEventListener('click', temp)
+  // body.addEventListener('click', temp)
+</script>
+</body>
+
+</html>
