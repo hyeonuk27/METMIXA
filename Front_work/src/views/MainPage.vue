@@ -1,7 +1,6 @@
 <template>
   <div id='MainPage'>
-    <!-- <img src="../assets/User.png" alt=""> -->
-    <img src="../assets/Trailer.png" alt="">
+    
   </div>
 </template>
 
