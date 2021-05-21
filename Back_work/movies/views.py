@@ -6,21 +6,43 @@ from django.db.models import F, Q
 
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from rest_framework import serializers, status
+from rest_framework import status
 
 import requests
 from decouple import config
+import random
+from django.db.models.aggregates import Sum
 
+# 인증된 사용자만 사용할 수 있도록 하는 데코레이터
+from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 # 메인 페이지
 # 영화 추천 / 조회 리스트 정보
 @api_view(['GET'])
+@authentication_classes([JSONWebTokenAuthentication]) # JWT가 유효한지
+@permission_classes([IsAuthenticated]) # 인증 여부를 확인
 def movie_list(request):
-    # 추천 알고리즘 작성
+    mode = request.GET.get('mode')
+    # 추천 0. mode - 알고리즘
+    # 새로고침 버튼 필요
+    if mode == 'algorithm':
+        weight = []
+        for id in range(1, 20):
+            genre_weight = RecommendAlgoScore.objects.filter(user__pk=request.user.pk, genre__pk=id).aggregate(Sum('rate'))['rate__sum']
+            weight.append(genre_weight if genre_weight else 0)
 
-    mode = request.GET.get('mode') # director, actor, title
+        recommend_genre_ids = random.choices([28, 12, 16, 35, 80, 99, 18, 10751, 14, 36, 27, 10402, 9648, 10749, 878, 10770, 53, 10752, 37], weight, k=6)
+        
+        print(recommend_genre_ids)
+        movies = Movie.objects.none()
+        for genre_id in recommend_genre_ids:
+            temp_movies = Movie.objects.filter(genres__tmdb_genre_id=genre_id)[:25]
+            movies = movies|temp_movies
+
     # 조회 1. mode - 최신순, 평점순, 인기순
-    if mode in ('release_date', 'vote_average', 'popularity'):
+    elif mode in ('release_date', 'vote_average', 'popularity'):
         if mode != 'vote_average':
             movies = Movie.objects.order_by(f'-{mode}')[:100]
         else:
@@ -38,9 +60,9 @@ def movie_list(request):
             # 한글 제목이나 원본 제목이 사용자의 입력(inputValue)를 포함하는 영화들을 반환(대소문자 구분하지 않음)
             movies = Movie.objects.filter(Q(title__icontains=inputValue)|Q(original_title__icontains=inputValue))[:100]
     # 조회 3. mode - 장르별
-    else:
+    elif mode == 'genre':
         inputGenre = request.GET.get('inputGenre')
-        movies = Movie.objects.filter(genres__tmdb_genre_id=inputGenre).distinct()[:100]
+        movies = Movie.objects.filter(genres__tmdb_genre_id=inputGenre)[:100]
 
     serializer = MovieListSerializer(movies, many=True)
     return Response(serializer.data)
@@ -49,6 +71,8 @@ def movie_list(request):
 # 영화 상세 페이지
 # 단일 영화 정보
 @api_view(['GET'])
+@authentication_classes([JSONWebTokenAuthentication])
+@permission_classes([IsAuthenticated])
 def movie_detail(request, movie_pk):
     movie = get_object_or_404(Movie, pk=movie_pk)
     serializer = MovieSerializer(movie)
@@ -57,6 +81,8 @@ def movie_detail(request, movie_pk):
 
 # 리뷰 조회, 생성
 @api_view(['GET', 'POST'])
+@authentication_classes([JSONWebTokenAuthentication])
+@permission_classes([IsAuthenticated])
 def review_list(request, movie_pk):
     movie = get_object_or_404(Movie, pk=movie_pk)
     if request.method == 'GET':
@@ -73,6 +99,8 @@ def review_list(request, movie_pk):
 
 # 리뷰 삭제, 수정
 @api_view(['PUT', 'DELETE'])
+@authentication_classes([JSONWebTokenAuthentication])
+@permission_classes([IsAuthenticated])
 def review_detail(request, review_pk):
     review = get_object_or_404(Review, pk=review_pk)
     # 리뷰 제거
@@ -92,6 +120,8 @@ def review_detail(request, review_pk):
 
 # 댓글 조회, 생성
 @api_view(['GET', 'POST'])
+@authentication_classes([JSONWebTokenAuthentication])
+@permission_classes([IsAuthenticated])
 def comment_list(request, review_pk):
     review = get_object_or_404(Review, pk=review_pk)
     if request.method == 'GET':
@@ -108,6 +138,8 @@ def comment_list(request, review_pk):
 
 # 댓글 삭제, 수정
 @api_view(['PUT', 'DELETE'])
+@authentication_classes([JSONWebTokenAuthentication])
+@permission_classes([IsAuthenticated])
 def comment_detail(request, comment_pk):
     comment = get_object_or_404(Comment, pk=comment_pk)
     # 댓글 제거
@@ -128,6 +160,8 @@ def comment_detail(request, comment_pk):
 # 내가 특정 영화에 준 평점 + 유저장르점수 중개테이블 **동시에 두 테이블이 채워지고 업데이트 되는 로직(매직)
 # 영화 상세 페이지 로드 시 영화 상세 정보 + 평점 api GET요청 필요
 @api_view(['GET', 'POST', 'PUT'])
+@authentication_classes([JSONWebTokenAuthentication])
+@permission_classes([IsAuthenticated])
 def rate(request, movie_pk):
     movie = get_object_or_404(Movie, pk=movie_pk)
     # filter가 아닌 get으로 가져오면 rate가 하나도 존재하지 않는 시점에서 오류 발생(filter는 객체가 없어도 빈 쿼리셋을 반환) .first()를 통해 하나만 가져온다.
@@ -167,6 +201,8 @@ def rate(request, movie_pk):
 # 포토티켓
 # 포토티켓 조회(한 유저에 대한 전체 포토티켓)
 @api_view(['GET'])
+@authentication_classes([JSONWebTokenAuthentication])
+@permission_classes([IsAuthenticated])
 def photo_ticket_list(request):
     photo_tickets = PhotoTicket.objects.filter(user__pk=request.user.pk)
     serializer = PhotoTicketSerializer(photo_tickets, many=True)
@@ -175,6 +211,8 @@ def photo_ticket_list(request):
 
 # 포토티켓 생성(추가)
 @api_view(['POST'])
+@authentication_classes([JSONWebTokenAuthentication])
+@permission_classes([IsAuthenticated])
 def photo_ticket_create(request, movie_pk):
     movie = get_object_or_404(Movie, pk=movie_pk)
     if request.method == 'POST':
@@ -186,6 +224,8 @@ def photo_ticket_create(request, movie_pk):
 
 # 포토티켓 삭제, 수정(소감 수정)
 @api_view(['PUT', 'DELETE'])
+@authentication_classes([JSONWebTokenAuthentication])
+@permission_classes([IsAuthenticated])
 def photo_ticket_detail(request, photo_ticket_pk):
     photo_ticket = get_object_or_404(PhotoTicket, pk=photo_ticket_pk)
     if request.method == 'DELETE':
@@ -205,100 +245,105 @@ def photo_ticket_detail(request, photo_ticket_pk):
 # 장르
 @api_view(['POST'])
 def get_genres_db(request):
-    # API키는 공개되어서는 안되는 내용이다. .env파일에 넣어두고 decouple을 사용해 꺼내온다.
-    API_KEY = config('API_KEY')
-    # TMDB의 API를 사용해 한국의 인기있는 영화들을 한국어로 가져온다.
-    url = f'https://api.themoviedb.org/3/genre/movie/list?api_key={API_KEY}&region=KR&language=ko'
-    # 받아온 json파일을 파이썬에서 활용가능한 dict 타입으로 변환한다.
-    req = requests.get(url).json()
-    Genre.objects.bulk_create(
-        [Genre(
-            tmdb_genre_id = data.get('id'),
-            name = data.get('name'),
-            ) for data in req.get('genres')]
-    )
-    
-    return Response({ 'db': '가져왔습니다.' })
+    if request.user.username == 'admin':
+        # API키는 공개되어서는 안되는 내용이다. .env파일에 넣어두고 decouple을 사용해 꺼내온다.
+        API_KEY = config('API_KEY')
+        # TMDB의 API를 사용해 한국의 인기있는 영화들을 한국어로 가져온다.
+        url = f'https://api.themoviedb.org/3/genre/movie/list?api_key={API_KEY}&region=KR&language=ko'
+        # 받아온 json파일을 파이썬에서 활용가능한 dict 타입으로 변환한다.
+        req = requests.get(url).json()
+        Genre.objects.bulk_create(
+            [Genre(
+                tmdb_genre_id = data.get('id'),
+                name = data.get('name'),
+                ) for data in req.get('genres')]
+        )
+        
+        return Response({ 'db': '가져왔습니다.' })
+    return Response({ 'Unauthorized': '권한이 없습니다.'}, status=status.HTTP_403_FORBIDDEN)
 
 
 # 영화
 @api_view(['POST'])
 def get_movies_db(request):
-    # request.user == 'admin' 조건 나중에 걸기
-    API_KEY = config('API_KEY')
-    for page in range(1, 2):
-        url = f'https://api.themoviedb.org/3/movie/popular?api_key={API_KEY}&page={page}&region=KR&language=ko'
-        req = requests.get(url).json()
-        for data in req.get('results'):
-            # 이미 DB에 있는 영화면 정보를 업데이트
-            if Movie.objects.filter(title=data.get('title')).exists():
-                movie = Movie.objects.get(title=data.get('title'))
-                movie.popularity = data.get('popularity')
-                movie.tmdb_vote_sum = data.get('vote_average') * data.get('vote_count')
-                movie.tmdb_vote_cnt = data.get('vote_count')
-                movie.save()
-            # DB에 없는 영화면 새로 생성
-            else:
-                movie = Movie.objects.create(
-                    tmdb_id = data.get('id'),
-                    title = data.get('title'),
-                    original_title = data.get('original_title'), 
-                    release_date = data.get('release_date'),
-                    popularity = data.get('popularity'),
-                    tmdb_vote_sum = float(data.get('vote_average')) * float(data.get('vote_count')),
-                    tmdb_vote_cnt = data.get('vote_count'),
-                    our_vote_sum = 0,
-                    our_vote_cnt = 0,
-                    overview = data.get('overview'),
-                    # poster_path는 받아온 데이터에 앞부분 URL을 제외한 이미지의 이름만이 들어있으므로 처리
-                    poster_path = 'https://image.tmdb.org/t/p/w500' + data.get('poster_path'),
-                    backdrop_path = 'https://image.tmdb.org/t/p/w500' + data.get('backdrop_path') if data.get('backdrop_path') else data.get('poster_path'),
-                )
-                for genre_id in data.get('genre_ids'):
-                    genre = Genre.objects.get(tmdb_genre_id=genre_id)
-                    genre.movies.add(movie)
+    if request.user.username == 'admin':
+        API_KEY = config('API_KEY')
+        for page in range(1, 11):
+            url = f'https://api.themoviedb.org/3/movie/popular?api_key={API_KEY}&page={page}&region=KR&language=ko'
+            req = requests.get(url).json()
+            for data in req.get('results'):
+                # 이미 DB에 있는 영화면 정보를 업데이트
+                if Movie.objects.filter(title=data.get('title')).exists():
+                    movie = Movie.objects.get(title=data.get('title'))
+                    movie.popularity = data.get('popularity')
+                    movie.tmdb_vote_sum = data.get('vote_average') * data.get('vote_count')
+                    movie.tmdb_vote_cnt = data.get('vote_count')
+                    movie.save()
+                # DB에 없는 영화면 새로 생성
+                else:
+                    movie = Movie.objects.create(
+                        tmdb_id = data.get('id'),
+                        title = data.get('title'),
+                        original_title = data.get('original_title'), 
+                        release_date = data.get('release_date'),
+                        popularity = data.get('popularity'),
+                        tmdb_vote_sum = float(data.get('vote_average')) * float(data.get('vote_count')),
+                        tmdb_vote_cnt = data.get('vote_count'),
+                        our_vote_sum = 0,
+                        our_vote_cnt = 0,
+                        overview = data.get('overview'),
+                        # poster_path는 받아온 데이터에 앞부분 URL을 제외한 이미지의 이름만이 들어있으므로 처리
+                        poster_path = 'https://image.tmdb.org/t/p/w500' + data.get('poster_path'),
+                        backdrop_path = 'https://image.tmdb.org/t/p/w500' + data.get('backdrop_path') if data.get('backdrop_path') else data.get('poster_path'),
+                    )
+                    for genre_id in data.get('genre_ids'):
+                        genre = Genre.objects.get(tmdb_genre_id=genre_id)
+                        genre.movies.add(movie)
 
 
-        # bulk_create의 문제점 -> 통째로 create를 하기 때문에 create된 객체를 받아와 중개모델에 add하는 작업이 불가
-        # 따라서, 위 코드처럼 objects 매니저를 사용해 하나하나 객체를 create해주고 반환된 객체를 사용해 중개모델에 add작업을 해준다.
+            # bulk_create의 문제점 -> 통째로 create를 하기 때문에 create된 객체를 받아와 중개모델에 add하는 작업이 불가
+            # 따라서, 위 코드처럼 objects 매니저를 사용해 하나하나 객체를 create해주고 반환된 객체를 사용해 중개모델에 add작업을 해준다.
 
-        # bulk_create
-        # Movie.objects.bulk_create(
-        #     [Movie(
-        #         tmdb_id = data.get('id'),
-        #         title = data.get('title'),
-        #         original_title = data.get('original_title'), 
-        #         release_date = data.get('release_date'),
-        #         popularity = data.get('popularity'),
-        #         tmdb_vote_sum = float(data.get('vote_average')) * float(data.get('vote_count')),
-        #         tmdb_vote_cnt = data.get('vote_count'),
-        #         our_vote_sum = 0,
-        #         our_vote_cnt = 0,
-        #         overview = data.get('overview'),
-        #         poster_path = 'https://image.tmdb.org/t/p/w500' + data.get('poster_path'),
-        #         backdrop_path = 'https://image.tmdb.org/t/p/w500' + data.get('backdrop_path') if data.get('backdrop_path') else data.get('poster_path'),
-        #         ) for data in req.get('results') if not Movie.objects.filter(title=data.get('title')).exists()]
-        # )
+            # bulk_create
+            # Movie.objects.bulk_create(
+            #     [Movie(
+            #         tmdb_id = data.get('id'),
+            #         title = data.get('title'),
+            #         original_title = data.get('original_title'), 
+            #         release_date = data.get('release_date'),
+            #         popularity = data.get('popularity'),
+            #         tmdb_vote_sum = float(data.get('vote_average')) * float(data.get('vote_count')),
+            #         tmdb_vote_cnt = data.get('vote_count'),
+            #         our_vote_sum = 0,
+            #         our_vote_cnt = 0,
+            #         overview = data.get('overview'),
+            #         poster_path = 'https://image.tmdb.org/t/p/w500' + data.get('poster_path'),
+            #         backdrop_path = 'https://image.tmdb.org/t/p/w500' + data.get('backdrop_path') if data.get('backdrop_path') else data.get('poster_path'),
+            #         ) for data in req.get('results') if not Movie.objects.filter(title=data.get('title')).exists()]
+            # )
 
-    return Response({ 'db': '가져왔습니다.' })
+        return Response({ 'db': '가져왔습니다.' })
+    return Response({ 'Unauthorized': '권한이 없습니다.'}, status=status.HTTP_403_FORBIDDEN)
 
 
 # 감독, 배우
 @api_view(['POST'])
 def get_casts_db(request):
-    API_KEY = config('API_KEY')
-    movies = get_list_or_404(Movie)
-    for movie in movies:
-        url = f'https://api.themoviedb.org/3/movie/{movie.tmdb_id}/credits?api_key={API_KEY}&region=KR&language=ko'
-        req = requests.get(url).json()
-        for data in req.get('cast')[:5]:
-            if not Actor.objects.filter(name=data.get('name')).exists() and data.get('known_for_department') == 'Acting':
-                actor = Actor.objects.create(name=data.get('name'), original_name=data.get('original_name'))
-                actor.movies.add(movie)
-        
-        for data in req.get('crew'):
-            if not Director.objects.filter(name=data.get('name')).exists() and data.get('job') == 'Director':
-                director = Director.objects.create(name=data.get('name'), original_name=data.get('original_name'))
-                director.movies.add(movie)
+    if request.user.username == 'admin':
+        API_KEY = config('API_KEY')
+        movies = get_list_or_404(Movie)
+        for movie in movies:
+            url = f'https://api.themoviedb.org/3/movie/{movie.tmdb_id}/credits?api_key={API_KEY}&region=KR&language=ko'
+            req = requests.get(url).json()
+            for data in req.get('cast')[:5]:
+                if not Actor.objects.filter(name=data.get('name')).exists() and data.get('known_for_department') == 'Acting':
+                    actor = Actor.objects.create(name=data.get('name'), original_name=data.get('original_name'))
+                    actor.movies.add(movie)
+            
+            for data in req.get('crew'):
+                if not Director.objects.filter(name=data.get('name')).exists() and data.get('job') == 'Director':
+                    director = Director.objects.create(name=data.get('name'), original_name=data.get('original_name'))
+                    director.movies.add(movie)
 
-    return Response({ 'db': '가져왔습니다.' })
+        return Response({ 'db': '가져왔습니다.' })
+    return Response({ 'Unauthorized': '권한이 없습니다.'}, status=status.HTTP_403_FORBIDDEN)

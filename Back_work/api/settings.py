@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'imagekit',
+    'django_seed',
 ]
 
 MIDDLEWARE = [

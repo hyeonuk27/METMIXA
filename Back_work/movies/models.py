@@ -6,7 +6,6 @@ User = settings.AUTH_USER_MODEL
 
 # 장르
 class Genre(models.Model):
-    recommend_users = models.ManyToManyField(User, related_name='recommend_genres')
     tmdb_genre_id = models.IntegerField()
     name = models.CharField(max_length=50)
 
