@@ -1,87 +1,208 @@
 from re import L
-from django.shortcuts import render, get_list_or_404, get_object_or_404
-from .models import Movie, Review, Genre, Director, Actor
-from .serializers import MovieListSerializer, MovieSerializer, ReviewSerializer
+from django.shortcuts import get_list_or_404, get_object_or_404
+from .models import Genre, Movie, Review, Comment, Director, Actor, PhotoTicket, Rate, RecommendAlgoScore
+from .serializers import MovieListSerializer, MovieSerializer, ReviewSerializer, CommentSerializer, PhotoTicketSerializer, RateSerializer, RecommendAlgoScoreSerializer
+from django.db.models import F, Q
 
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from rest_framework import status
+from rest_framework import serializers, status
 
 import requests
 from decouple import config
 
 
+# 메인 페이지
 # 영화 추천 / 조회 리스트 정보
-# @api_view(['GET'])
-# def index(request):
-#     # 추천 알고리즘 작성
-
-#     mode = request.GET.get('mode') # director, actor, title
-#     # 조회 1. mode - 최신순, 평점순, 인기순
-#     if mode in ('release_date', 'vote_average', 'popularity'):
-#         movies = Movie.objects.order_by(f'-{mode}')[:50]
-#     elif mode in ('direc')
-#     # 조회 2. mode - 감독별, 배우별, 영화명별
-#     movies = Movie.objects.filter(mode=request.GET.get('inputValue'))[:50]
-#     # 조회 3. 
-# ß
-#     serializer = MovieListSerializer(movies, many=True)
-#     return Response(serializer.data)
 @api_view(['GET'])
-def index(request):
-    movie = get_list_or_404(Movie)
-    serializer = MovieListSerializer(movie, many=True)
+def movie_list(request):
+    # 추천 알고리즘 작성
+
+    mode = request.GET.get('mode') # director, actor, title
+    # 조회 1. mode - 최신순, 평점순, 인기순
+    if mode in ('release_date', 'vote_average', 'popularity'):
+        if mode != 'vote_average':
+            movies = Movie.objects.order_by(f'-{mode}')[:100]
+        else:
+            movies = Movie.objects.annotate(vote_average=(F('tmdb_vote_sum') + F('our_vote_sum')) / (F('tmdb_vote_cnt') + F('our_vote_cnt'))).order_by('-vote_average')[:100]
+    elif mode in ('director', 'actor', 'title'):
+    # 조회 2. mode - 감독별, 배우별, 영화명별
+        inputValue = request.GET.get('inputValue')
+        if mode == 'director':
+            # MtoM 관계에서 원하는 조건을 가지는 영화들을 가져오는 방법
+            # https://docs.djangoproject.com/en/3.2/topics/db/examples/many_to_many/
+            movies = Movie.objects.filter(Q(directors__name__icontains=inputValue)|Q(directors__original_name__icontains=inputValue)).distinct()[:100]
+        elif mode == 'actor':
+            movies = Movie.objects.filter(Q(actors__name__icontains=inputValue)|Q(actors__original_name__icontains=inputValue)).distinct()[:100]
+        else:
+            # 한글 제목이나 원본 제목이 사용자의 입력(inputValue)를 포함하는 영화들을 반환(대소문자 구분하지 않음)
+            movies = Movie.objects.filter(Q(title__icontains=inputValue)|Q(original_title__icontains=inputValue))[:100]
+    # 조회 3. mode - 장르별
+    else:
+        inputGenre = request.GET.get('inputGenre')
+        movies = Movie.objects.filter(genres__tmdb_genre_id=inputGenre).distinct()[:100]
+
+    serializer = MovieListSerializer(movies, many=True)
     return Response(serializer.data)
 
 
+# 영화 상세 페이지
 # 단일 영화 정보
 @api_view(['GET'])
-def detail(request, movie_pk):
+def movie_detail(request, movie_pk):
     movie = get_object_or_404(Movie, pk=movie_pk)
     serializer = MovieSerializer(movie)
     return Response(serializer.data)
 
 
-# 전체 리뷰 조회, 생성
+# 리뷰 조회, 생성
 @api_view(['GET', 'POST'])
-def reviews(request):
+def review_list(request, movie_pk):
+    movie = get_object_or_404(Movie, pk=movie_pk)
     if request.method == 'GET':
-        reviews = get_list_or_404(Review)
+        reviews = Review.objects.filter(movie__pk=movie_pk)
         serializer = ReviewSerializer(reviews, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':
         serializer = ReviewSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
+        if serializer.is_valid(raise_exception=True):
+            # Vue에서 axios 요청할 때 URI에 movie의 id값을 넣어서 요청해야 함
+            serializer.save(user=request.user, movie=movie)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-# 리뷰 detail, 수정, 삭제 + 댓글 생성
-@api_view(['GET', 'PUT', 'DELETE', 'POST'])
-def review(request, review_pk):
-    review = get_object_or_404(Review, pk=review_pk)
-    # 리뷰 조회
-    if request.method == 'GET':
-        serializer = ReviewSerializer(review)
-        return Response(serializer.data)
 
+# 리뷰 삭제, 수정
+@api_view(['PUT', 'DELETE'])
+def review_detail(request, review_pk):
+    review = get_object_or_404(Review, pk=review_pk)
     # 리뷰 제거
-    elif request.method == 'DELETE':
+    if request.method == 'DELETE':
         review.delete()
         data = {
             'delete' : f'{review_pk}번 리뷰가 삭제되었습니다.'
         }
         return Response(data, status=status.HTTP_204_NO_CONTENT)
-
     # 리뷰 수정
     elif request.method == 'PUT':
         serializer = ReviewSerializer(review, data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data)
-        # return Response(serializer.data, status=stßatus.HTTP_400_BAD_REQUEST)
 
 
-# DB 구성
+# 댓글 조회, 생성
+@api_view(['GET', 'POST'])
+def comment_list(request, review_pk):
+    review = get_object_or_404(Review, pk=review_pk)
+    if request.method == 'GET':
+        comments = Comment.objects.filter(review__pk=review_pk)
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = CommentSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            # Vue에서 axios 요청할 때 URI에 movie의 id값을 넣어서 요청해야 함
+            serializer.save(user=request.user, review=review)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+# 댓글 삭제, 수정
+@api_view(['PUT', 'DELETE'])
+def comment_detail(request, comment_pk):
+    comment = get_object_or_404(Comment, pk=comment_pk)
+    # 댓글 제거
+    if request.method == 'DELETE':
+        comment.delete()
+        data = {
+            'delete' : f'{comment_pk}번 댓글이 삭제되었습니다.'
+        }
+        return Response(data, status=status.HTTP_204_NO_CONTENT)
+    # 댓글 수정
+    elif request.method == 'PUT':
+        serializer = CommentSerializer(comment, data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data)
+
+
+# 내가 특정 영화에 준 평점 + 유저장르점수 중개테이블 **동시에 두 테이블이 채워지고 업데이트 되는 로직(매직)
+# 영화 상세 페이지 로드 시 영화 상세 정보 + 평점 api GET요청 필요
+@api_view(['GET', 'POST', 'PUT'])
+def rate(request, movie_pk):
+    movie = get_object_or_404(Movie, pk=movie_pk)
+    # filter가 아닌 get으로 가져오면 rate가 하나도 존재하지 않는 시점에서 오류 발생(filter는 객체가 없어도 빈 쿼리셋을 반환) .first()를 통해 하나만 가져온다.
+    rate = Rate.objects.filter(user__pk=request.user.pk, movie__pk=movie_pk).first()
+    # 함수 내부에서 또 다르게 작동되는 기능: 유저장르점수 중개테이블 채우기
+    # 1. movie에 대한 장르 아이디들을 받아온다.
+    genres = Genre.objects.filter(movies__pk=movie_pk)
+    if request.method == 'GET':
+        serializer = RateSerializer(rate)
+        return Response(serializer.data)
+    # POST를 두 번하게 하면 안된다. Vue에서 if문 분기처리 필요(GET을 하고 인스턴스가 존재하면 PUT, 존재하지 않으면 POST)
+    elif request.method == 'POST':
+        serializer = RateSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save(user=request.user, movie=movie)
+            # 2. for문을 통해 각 장르 아이디들에 대해서 유저장르점수 객체를 만든다.
+            for genre in genres:
+                serializer_algo = RecommendAlgoScoreSerializer(data=request.data)
+                if serializer_algo.is_valid(raise_exception=True):
+                    serializer_algo.save(genre=genre, user=request.user)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    elif request.method == 'PUT':
+        serializer = RateSerializer(rate, data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            # 3. for문을 통해 각 장르 아이디들에 대해 유저장르점수 객체 업데이트
+            for genre in genres:
+                recommend_algo_score = RecommendAlgoScore.objects.filter(user__pk=request.user.pk, genre__pk=genre.pk).first()
+                serializer_algo = RecommendAlgoScoreSerializer(recommend_algo_score, data=request.data)
+                if serializer_algo.is_valid(raise_exception=True):
+                    serializer_algo.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+# 포토티켓
+# 포토티켓 조회(한 유저에 대한 전체 포토티켓)
+@api_view(['GET'])
+def photo_ticket_list(request):
+    photo_tickets = PhotoTicket.objects.filter(user__pk=request.user.pk)
+    serializer = PhotoTicketSerializer(photo_tickets, many=True)
+    return Response(serializer.data)
+
+
+# 포토티켓 생성(추가)
+@api_view(['POST'])
+def photo_ticket_create(request, movie_pk):
+    movie = get_object_or_404(Movie, pk=movie_pk)
+    if request.method == 'POST':
+        serializer = PhotoTicketSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user, movie=movie, poster_path=movie.poster_path)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+# 포토티켓 삭제, 수정(소감 수정)
+@api_view(['PUT', 'DELETE'])
+def photo_ticket_detail(request, photo_ticket_pk):
+    photo_ticket = get_object_or_404(PhotoTicket, pk=photo_ticket_pk)
+    if request.method == 'DELETE':
+        photo_ticket.delete()
+        data = {
+            'delete' : f'{photo_ticket_pk}번 포토티켓이 삭제되었습니다.'
+        }
+        return Response(data, status=status.HTTP_204_NO_CONTENT)
+    elif request.method == 'PUT':
+        serializer = PhotoTicketSerializer(photo_ticket, data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data)
+
+
+# admin용 api - DB 구성 (장르 - 영화 - 감독, 배우 API 순으로 요청)
+# 장르
 @api_view(['POST'])
 def get_genres_db(request):
     # API키는 공개되어서는 안되는 내용이다. .env파일에 넣어두고 decouple을 사용해 꺼내온다.
@@ -100,6 +221,7 @@ def get_genres_db(request):
     return Response({ 'db': '가져왔습니다.' })
 
 
+# 영화
 @api_view(['POST'])
 def get_movies_db(request):
     # request.user == 'admin' 조건 나중에 걸기
@@ -142,8 +264,6 @@ def get_movies_db(request):
 
         # bulk_create
         # Movie.objects.bulk_create(
-        #     # 받아온 데이터에는 results라는 키의 값에 모든 영화의 정보들이 리스트로 담겨있다.
-        #     # 각 영화 정보를 순회하며 이미 영화 제목을 통해 이미 DB에 있는지 확인하고, 없다면 객체를 생성해 DB에 추가되도록 한다.
         #     [Movie(
         #         tmdb_id = data.get('id'),
         #         title = data.get('title'),
@@ -155,7 +275,6 @@ def get_movies_db(request):
         #         our_vote_sum = 0,
         #         our_vote_cnt = 0,
         #         overview = data.get('overview'),
-        #         # poster_path는 받아온 데이터에 앞부분 URL을 제외한 이미지의 이름만이 들어있으므로 처리
         #         poster_path = 'https://image.tmdb.org/t/p/w500' + data.get('poster_path'),
         #         backdrop_path = 'https://image.tmdb.org/t/p/w500' + data.get('backdrop_path') if data.get('backdrop_path') else data.get('poster_path'),
         #         ) for data in req.get('results') if not Movie.objects.filter(title=data.get('title')).exists()]
@@ -164,6 +283,7 @@ def get_movies_db(request):
     return Response({ 'db': '가져왔습니다.' })
 
 
+# 감독, 배우
 @api_view(['POST'])
 def get_casts_db(request):
     API_KEY = config('API_KEY')
@@ -180,20 +300,5 @@ def get_casts_db(request):
             if not Director.objects.filter(name=data.get('name')).exists() and data.get('job') == 'Director':
                 director = Director.objects.create(name=data.get('name'), original_name=data.get('original_name'))
                 director.movies.add(movie)
-
-        # bulk_create
-        # Director.objects.bulk_create(
-        #     [Director(
-        #         name = data.get('name'),
-        #         original_name = data.get('original_name'),
-        #         ) for data in req.get('crew') if not Director.objects.filter(name=data.get('name')).exists() and data.get('job') == 'Director']
-        # )
-
-        # Actor.objects.bulk_create(
-        #     [Actor(
-        #         name = data.get('name'),
-        #         original_name = data.get('original_name'),
-        #         ) for data in req.get('cast')[:5] if not Actor.objects.filter(name=data.get('name')).exists() and data.get('known_for_department') == 'Acting']
-        # )
 
     return Response({ 'db': '가져왔습니다.' })

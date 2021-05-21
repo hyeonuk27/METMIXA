@@ -1,13 +1,22 @@
 from rest_framework import serializers
-from .models import Movie, Review, Genre
+from .models import Movie, Review, Genre, Comment, PhotoTicket, Rate, RecommendAlgoScore
+
+
+class CommentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'user', 'review', 'content', 'created_at', 'updated_at',)
+        read_only_fields = ('user', 'review',)
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    
+    comments = CommentSerializer(many=True, read_only=True)
+    comments_count = serializers.IntegerField(source='comments.count', read_only=True)
     class Meta:
         model = Review
-        fields = ('user', 'movie', 'content', 'created_at', 'updated_at',)
-        read_only_fields = ('movie', 'user',)
+        fields = ('id', 'user', 'movie', 'content', 'created_at', 'updated_at', 'comments', 'comments_count',)
+        read_only_fields = ('user', 'movie',)
 
 
 class MovieListSerializer(serializers.ModelSerializer):
@@ -15,6 +24,7 @@ class MovieListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
         fields = (
+            'id',
             'tmdb_id',
             'title',
             'tmdb_vote_sum', 
@@ -31,6 +41,7 @@ class MovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
         fields = (
+            'id',
             'tmdb_id', 
             'title',
             'original_title',
@@ -49,5 +60,30 @@ class MovieSerializer(serializers.ModelSerializer):
         )
 
 
+# 필수사항이 아님. 여력이 있으면 하기
 class GenreSerializer(serializers.ModelSerializer):
     pass
+
+
+class PhotoTicketSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PhotoTicket
+        fields = ('id', 'user', 'movie', 'message', 'poster_path',)
+        read_only_fields = ('user', 'movie', 'poster_path',)
+
+
+class RateSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Rate
+        fields = ('id', 'user', 'movie', 'rate',)
+        read_only_fields = ('user', 'movie',)
+
+
+class RecommendAlgoScoreSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = RecommendAlgoScore
+        fields = ('id', 'user', 'genre', 'rate',)
+        read_only_fields = ('user', 'genre',)
