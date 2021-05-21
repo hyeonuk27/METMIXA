@@ -10,6 +10,17 @@ body {
   
 }
 
+img {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: -1;
+  border-radius: 30px;
+  background-size: cover;
+  background-position: center center;
+}
+
+
 .cards {
   bottom: 0;
   margin-bottom: 10%;
@@ -23,10 +34,12 @@ body {
 }
 
 .card {
-  height: 300px;
+  height: 250px;
+  max-height: 250px;
   margin: 0 -10px;
   position: relative;
-  width: 500px;
+  width: 300px;
+  max-width: 300px;
 }
 .card:after {
   bottom: 0;
@@ -105,9 +118,6 @@ body {
 }
 
 .card:nth-child(1) .card-face {
-  background-image: url('https://picsum.photos/id/100/1000/1000');
-  background-size: cover;
-  background-position: center center;
   border-radius: 30px;
   -webkit-transform: translateY(45px) rotate(-28.125deg);
           transform: translateY(45px) rotate(-28.125deg);
@@ -144,9 +154,6 @@ body {
 }
 
 .card:nth-child(2) .card-face {
-  background-image: url('https://picsum.photos/id/101/1000/1000');
-  background-size: cover;
-  background-position: center center;
   border-radius: 30px;
   -webkit-transform: translateY(35px) rotate(-21.875deg);
           transform: translateY(35px) rotate(-21.875deg);
@@ -174,9 +181,6 @@ body {
 
 
 .card:nth-child(3) .card-face {
-  background-image: url('https://picsum.photos/id/102/1000/1000');
-  background-size: cover;
-  background-position: center center;
   border-radius: 30px;
   -webkit-transform: translateY(25px) rotate(-15.625deg);
           transform: translateY(25px) rotate(-15.625deg);
@@ -185,9 +189,6 @@ body {
   color: #af00db;
 }
 .card:nth-child(3):hover .card-face {
-  background-image: url('https://picsum.photos/id/103/1000/1000');
-  background-size: cover;
-  background-position: center center;
   -webkit-transform: translateY(-100px) rotate(0deg) scale(2);
           transform: translateY(-100px) rotate(0deg) scale(2);
   transition-duration: 0ms;
@@ -206,9 +207,6 @@ body {
 }
 
 .card:nth-child(4) .card-face {
-  background-image: url('https://picsum.photos/id/104/1000/1000');
-  background-size: cover;
-  background-position: center center;
   border-radius: 30px;
   -webkit-transform: translateY(15px) rotate(-9.375deg);
           transform: translateY(15px) rotate(-9.375deg);
@@ -235,9 +233,6 @@ body {
 }
 
 .card:nth-child(5) .card-face {
-  background-image: url('https://picsum.photos/id/111/1000/1000');
-  background-size: cover;
-  background-position: center center;
   border-radius: 30px;
   -webkit-transform: translateY(5px) rotate(-3.125deg);
           transform: translateY(5px) rotate(-3.125deg);
@@ -264,9 +259,6 @@ body {
 }
 
 .card:nth-child(6) .card-face {
-  background-image: url('https://picsum.photos/id/106/1000/1000');
-  background-size: cover;
-  background-position: center center;
   border-radius: 30px;
   -webkit-transform: translateY(5px) rotate(3.125deg);
           transform: translateY(5px) rotate(3.125deg);
@@ -288,14 +280,14 @@ body {
   top: -175px;
 }
 
+
+
+
 .card:nth-child(7) {
   bottom: 130px;
 }
 
 .card:nth-child(7) .card-face {
-  background-image: url('https://picsum.photos/id/107/1000/1000');
-  background-size: cover;
-  background-position: center center;
   border-radius: 30px;
   -webkit-transform: translateY(15px) rotate(9.375deg);
           transform: translateY(15px) rotate(9.375deg);
@@ -323,9 +315,6 @@ body {
 }
 
 .card:nth-child(8) .card-face {
-  background-image: url('https://picsum.photos/id/108/1000/1000');
-  background-size: cover;
-  background-position: center center;
   border-radius: 30px;
   -webkit-transform: translateY(25px) rotate(15.625deg);
           transform: translateY(25px) rotate(15.625deg);
@@ -352,10 +341,8 @@ body {
   bottom: 50px;
 }
 
+
 .card:nth-child(9) .card-face {
-  background-image: url('https://picsum.photos/id/19/1000/1000');
-  background-size: cover;
-  background-position: center center;
   border-radius: 30px;
   -webkit-transform: translateY(35px) rotate(21.875deg);
           transform: translateY(35px) rotate(21.875deg);
@@ -382,9 +369,6 @@ body {
 }
 
 .card:nth-child(10) .card-face {
-  background-image: url('https://picsum.photos/1000/1000');
-  background-size: cover;
-  background-position: center center;
   border-radius: 30px;
   -webkit-transform: translateY(45px) rotate(28.125deg);
           transform: translateY(45px) rotate(28.125deg);
