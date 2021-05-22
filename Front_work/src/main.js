@@ -6,9 +6,19 @@ import VueFullPage from 'vue-fullpage.js'
 import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify'
+import BootstrapVue from 'bootstrap-vue'
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+import { BCard } from 'bootstrap-vue'
+import ElementUI from "element-ui";
+
 
 Vue.config.productionTip = false
 Vue.use(VueFullPage)
+Vue.use(BootstrapVue)
+Vue.component('b-card', BCard)
+Vue.use(ElementUI);
+Vue.config.productionTip = false;
 
 new Vue({
   created() {
