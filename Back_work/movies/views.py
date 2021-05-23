@@ -18,6 +18,7 @@ from django.core.paginator import Paginator
 from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from rest_framework.renderers import JSONRenderer
 
 # 메인 페이지
 # 영화 추천 / 조회 리스트 정보
@@ -30,13 +31,13 @@ def movie_list(request):
     # 새로고침 버튼 필요
     if mode == 'algorithm':
         weight = []
+        # 장르가 19개 있다.
         for id in range(1, 20):
             genre_weight = RecommendAlgoScore.objects.filter(user__pk=request.user.pk, genre__pk=id).aggregate(Sum('rate'))['rate__sum']
-            weight.append(genre_weight if genre_weight else 0)
+            weight.append(genre_weight if genre_weight else 1)
 
         recommend_genre_ids = random.choices([28, 12, 16, 35, 80, 99, 18, 10751, 14, 36, 27, 10402, 9648, 10749, 878, 10770, 53, 10752, 37], weight, k=6)
-        
-        print(recommend_genre_ids)
+
         movies = Movie.objects.none()
         for genre_id in recommend_genre_ids:
             temp_movies = Movie.objects.filter(genres__tmdb_genre_id=genre_id)[:25]
@@ -210,7 +211,9 @@ def photo_ticket_list(request):
     page_num = request.GET.get('page_num')
     photo_tickets = paginator.get_page(page_num)
     serializer = PhotoTicketSerializer(photo_tickets, many=True)
-    return Response(serializer.data)
+    data = serializer.data
+    data.append({'possible_page': paginator.num_pages})
+    return Response(data)
 
 
 # 포토티켓 생성(추가)

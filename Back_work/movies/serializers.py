@@ -32,6 +32,7 @@ class MovieListSerializer(serializers.ModelSerializer):
             'our_vote_sum', 
             'our_vote_cnt',
             'poster_path', 
+            'backdrop_path',
         )
 
 

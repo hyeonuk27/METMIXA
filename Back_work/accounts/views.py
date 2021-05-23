@@ -16,14 +16,14 @@ def signup(request):
 
     if password != password_confirmation:
         return Response({'error': '비밀번호가 일치하지 않습니다.'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    serializer = UserSerializer(data=request.data)
 
+    serializer = UserSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
         user = serializer.save()
         user.set_password(request.data.get('password'))
         user.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
