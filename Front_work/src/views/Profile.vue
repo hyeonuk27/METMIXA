@@ -12,9 +12,10 @@
     <div id="masonry_layer" class="container">
       <vue-masonry-wall :items="photoTickets" :options="{width: 300, padding: 8}" class="m-0 mansory_template">
           <template v-slot:default="{item}">
-            <div class="item photo_ticket d-inline-block">
+            <!-- item은 포토티켓 객체. movie_id는 movie라는 이름으로 접근 -->
+            <div class="item photo_ticket d-inline-block" @click="$router.push({ name: 'Detail', query: { moviePk: `${item.movie}`}})">
               <img id="image" :src="item.poster_path" class="card-img-top d-inline-block" alt="...">
-              <p>{{ item.message }}</p>
+              <p>{{ item.title }}</p>
             </div>
           </template>
       </vue-masonry-wall>

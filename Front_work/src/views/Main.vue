@@ -1,74 +1,71 @@
 <template>
   <div id='Main'>
-    <h1>METMIXA</h1>
-    <img id="my-menu" @click="logout" src="@/assets/default_profile.jpg">
-    <div>
-      <div>
-
+    <h1 id='logo' @click="uncheck">METMIXA</h1>
+    <iframe width="1920" height="1080" :src="videoURI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <!-- <img id="bg" :src="movieList[0].backdrop_path" alt=""> -->
+    <input type="checkbox" id="my-menu"><label for="my-menu"><img src="@/assets/default_profile.jpg"></label>
+    <div class="sidebar">
+      <div id="menu1" class="menu mb-2 text-start fw-bold" @click="$router.push({ name: 'Profile' })">
+        <span>포토티켓</span>
       </div>
-      <div>
-
+      <div class="menu text-start fw-bold" @click="logout">
+        <span>로그아웃</span>
       </div>
     </div>
-    <swiper class="swiper" :options="swiperOption" ref="swiper">
-      <swiper-slide class="menu">Menu slide</swiper-slide>
-      <swiper-slide class="content">
-        <div
-          class="menu-button"
-          :class="{ 'opened': menuOpened }"
-          @click="toggleMenu($event)"
-        >
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-        </div>
-        Content slide
-      </swiper-slide>
-    </swiper>
+    <MovieList class="mt-5" :movieList="movieList"/>
   </div>
 </template>
 
 <script>
-import { mapActions } from 'vuex'
-import { Swiper, SwiperSlide } from 'vue-awesome-swiper'
-import 'swiper/css/swiper.css'
+import { mapActions, mapGetters } from 'vuex'
+import axios from 'axios'
+import MovieList from '@/components/MainPage/MovieList'
 
 export default {
   name: 'Main',
   components: {
-    Swiper,
-    SwiperSlide
+    MovieList,
   },
   data() {
     return {
-      menuOpened: false,
-      swiperOption: {
-        initialSlide: 1,
-        resistanceRatio: 0,
-        slidesPerView: 'auto',
-        on: {
-          slideChange: () => {
-            this.menuOpened = this.swiper.activeIndex === 0
-          }
-        }
-      }
+      movieList: [],
     }
   },
   methods: {
     ...mapActions([
       'logout',
+      'fetchVideos',
     ]),
-    toggleMenu() {
-      this.menuOpened
-        ? this.swiper.slideNext()
-        : this.swiper.slidePrev()
-    }
+    uncheck: function () {
+      const myMenu = document.querySelector('#my-menu')
+      myMenu.checked = false
+    },
   },
   computed: {
-    swiper() {
-      return this.$refs.swiper.$swiper
-    }
+    ...mapGetters([
+      'config',
+      'videoURI'
+    ])
   },
+  created: function () {
+    axios({
+        method: 'get',
+        // 장고한테 요청
+        url: 'http://127.0.0.1:8000/api/v1/movies/',
+        params: {
+          mode: 'algorithm',
+        },
+        headers: this.config
+      })
+      .then((res)=>{
+        // 응답 데이터에서 가능한 페이지 수 데이터만 pop해서 가져온다.
+        this.movieList = res.data
+        this.fetchVideos(this.movieList[0].tmdb_id)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }
 }
 </script>
 
@@ -82,96 +79,78 @@ export default {
   min-height: 100%;
 } */
 
-#my-menu{
+#my-menu + label{
+  position: fixed;
+  z-index: 3;
+  top: 1.6rem;
+  right: 2.2rem;
+  width: 45px;
+  height: 45px;
+  border-radius: 100%;
+  cursor: pointer;
+  transition: .3s;
+}
+
+#my-menu + label > img {
+  border-radius: 100%;
+}
+
+#my-menu + label:hover {
+  transform: translateY(1.5px) rotate(-10deg);
+  opacity: .7;
+}
+
+input[type=checkbox] { 
+  display:none
+}
+
+div[class=sidebar] {
+  width: 200px;
+  height: 100%;
+  background: #222;
+  opacity: 0.95;
+  position: fixed;
+  top: 0;
+  right: -200px;
+  z-index: 2;
+  transition: all .35s;
+}
+
+input[type=checkbox]:checked + label + div {
+  right: 0;
+}
+
+#menu1 {
+  margin-top: 6rem;
+}
+
+.menu {
+  margin-left: 1rem;
+  color: #818181;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.menu > span:hover {
+  color: #f1f1f1;
+}
+
+#Main > iframe {
+  z-index: -1;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#logo {
   position: fixed;
   top: 1rem;
-  right: 1.2rem;
-  width: 35px;
-  height: 35px;
-  border-radius: 100%;
-  display: block;
-  cursor: pointer;
+  left: 0.75rem;
+  color: #f1f1f1;
+  opacity: 0.7;
+  font-size: 3.2rem;
 }
-</style>
 
-<style lang="scss" scoped>
-  // @import './base.scss';
-  .swiper {
-    .menu {
-      min-width: 100px;
-      width: 70%;
-      max-width: 320px;
-      background-color: #2C8DFB!important;
-      color: #fff;
-      // height: 300px;
-    }
-
-    .content {
-      width: 100%;
-    }
-
-    .menu-button {
-      position: absolute;
-      top: 0px;
-      left: 0px;
-      padding: 15px;
-      cursor: pointer;
-      transition: .3s;
-      background-color: #2C8DFB;
-
-      .bar {
-        position: relative;
-        display: block;
-        width: 50px;
-        height: 5px;
-        margin: 10px auto;
-        background-color: #fff;
-        border-radius: 10px;
-        transition: .3s;
-
-        &:nth-of-type(1) {
-          margin-top: 0px;
-        }
-        &:nth-of-type(3) {
-          margin-bottom: 0px;
-        }
-      }
-
-      &:hover {
-        .bar:nth-of-type(1) {
-          transform: translateY(1.5px) rotate(-4.5deg);
-        }
-        .bar:nth-of-type(2) {
-          opacity: .9;
-        }
-        .bar:nth-of-type(3) {
-          transform: translateY(-1.5px) rotate(4.5deg);
-        }
-      }
-
-      &.opened {
-        .bar:nth-of-type(1) {
-          transform: translateY(15px) rotate(-45deg);
-        }
-        .bar:nth-of-type(2) {
-          opacity: 0;
-        }
-        .bar:nth-of-type(3) {
-          transform: translateY(-15px) rotate(45deg);
-        }
-
-        &:hover {
-          .bar:nth-of-type(1) {
-            transform: translateY(13.5px) rotate(-40.5deg);
-          }
-          .bar:nth-of-type(2) {
-            opacity: .1;
-          }
-          .bar:nth-of-type(3) {
-            transform: translateY(-13.5px) rotate(40.5deg);
-          }
-        }
-      }
-    }
-  }
 </style>
