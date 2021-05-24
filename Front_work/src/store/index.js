@@ -2,11 +2,15 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import SERVER from '@/api/drf.js'
 import router from '@/router/index.js'
-import axios from 'axios'
+
 Vue.use(Vuex)
+
+import axios from 'axios'
+
 export default new Vuex.Store({
   state: {
     authToken: localStorage.getItem('jwt'),
+    videoKey: '',
   },
   getters: {
     isLoggedIn: function (state) {
@@ -16,7 +20,10 @@ export default new Vuex.Store({
       return {
         Authorization: `JWT ${state.authToken}`
       }
-    }
+    },
+    videoURI: function (state) {
+      return `https://www.youtube.com/embed/${state.videoKey}?autoplay=1&mute=1&loop=1&playlist=${state.videoKey}`
+    },
   },
   mutations: {
     SET_TOKEN: function (state, token) {
@@ -27,6 +34,9 @@ export default new Vuex.Store({
       localStorage.removeItem('jwt')
       state.authToken = ''
     },
+    SET_VIDEO_KEY: function (state, key) {
+      state.videoKey = key
+    }
   },
   actions: {
     login: function ({ commit }, credentials) {
@@ -67,6 +77,19 @@ export default new Vuex.Store({
         console.log(err)
       })
     },
+    fetchVideos: function ({ commit }, movie_id) {
+      axios({
+        url: `https://api.themoviedb.org/3/movie/${movie_id}/videos?api_key=${process.env.VUE_APP_TMDB_API_KEY}&region=KR&language=ko`,
+        method: 'get', 
+      })
+      .then((res) => {
+        console.log(res.data.results[0].key)
+        commit('SET_VIDEO_KEY', res.data.results[0].key)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+    }
   },
   modules: {
   }

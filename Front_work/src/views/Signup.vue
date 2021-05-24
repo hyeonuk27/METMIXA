@@ -91,7 +91,7 @@ export default {
         passwordConfirmation: '',
         // image: '',
       },
-      windowWidth: parseInt(window.innerWidth)+"px",
+      windowWidth: parseInt(screen.availWidth)+"px",
       rules: {
         nickname: [
           {
@@ -157,7 +157,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 8rem;
+  padding-top: 12rem;
 }
 
 .signup-button {
@@ -186,7 +186,7 @@ export default {
 
 <style lang="scss">
 $teal: rgba(71, 63, 113, 0.8);
-.el-button--primary {
+.signup-button--primary {
   background: $teal;
   border-color: $teal;
 

@@ -61,7 +61,7 @@
           username: '',
           password: '',
         },
-        windowWidth: parseInt(window.innerWidth)+"px",
+        windowWidth: parseInt(screen.availWidth)+"px",
         rules: {
           username: [
             {
@@ -100,7 +100,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 10rem;
+  padding-top: 14rem;
 }
 
 .login-button {
@@ -130,7 +130,7 @@
 
 <style lang="scss">
 $teal: rgba(71, 63, 113, 0.8);
-.el-button--primary {
+.login-button--primary {
   background: $teal;
   border-color: $teal;
 
