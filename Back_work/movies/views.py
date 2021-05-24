@@ -1,7 +1,7 @@
 from re import L
 from django.shortcuts import get_list_or_404, get_object_or_404
 from .models import Genre, Movie, Review, Comment, Director, Actor, PhotoTicket, Rate, RecommendAlgoScore
-from .serializers import MovieListSerializer, MovieSerializer, ReviewSerializer, CommentSerializer, PhotoTicketSerializer, RateSerializer, RecommendAlgoScoreSerializer
+from .serializers import MovieListSerializer, MovieSerializer, ReviewSerializer, CommentSerializer, PhotoTicketSerializer, RateSerializer, RecommendAlgoScoreSerializer, DirectorSerializer, ActorSerializer
 from django.db.models import F, Q
 
 from rest_framework.response import Response
@@ -81,6 +81,26 @@ def movie_detail(request, movie_pk):
     return Response(serializer.data)
 
 
+# 감독 정보
+@api_view(['GET'])
+@authentication_classes([JSONWebTokenAuthentication])
+@permission_classes([IsAuthenticated])
+def director(request, movie_pk):
+    director = Director.objects.filter(movies__pk=movie_pk).first()
+    serializer = DirectorSerializer(director)
+    return Response(serializer.data)
+
+
+# 주연 배우 정보
+@api_view(['GET'])
+@authentication_classes([JSONWebTokenAuthentication])
+@permission_classes([IsAuthenticated])
+def actors(request, movie_pk):
+    actors = Actor.objects.filter(movies__pk=movie_pk)[:2]
+    serializer = ActorSerializer(actors, many=True)
+    return Response(serializer.data)
+
+
 # 리뷰 조회, 생성
 @api_view(['GET', 'POST'])
 @authentication_classes([JSONWebTokenAuthentication])
@@ -88,13 +108,17 @@ def movie_detail(request, movie_pk):
 def review_list(request, movie_pk):
     movie = get_object_or_404(Movie, pk=movie_pk)
     if request.method == 'GET':
-        reviews = Review.objects.filter(movie__pk=movie_pk)
+        reviews = Review.objects.filter(movie__pk=movie_pk).order_by('-pk')
+        paginator = Paginator(reviews, 5)
+        page_number = request.GET.get('page_num')
+        reviews = paginator.get_page(page_number)
         serializer = ReviewSerializer(reviews, many=True)
-        return Response(serializer.data)
+        data = serializer.data
+        data.append({'possible_page': paginator.num_pages})
+        return Response(data)
     elif request.method == 'POST':
         serializer = ReviewSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            # Vue에서 axios 요청할 때 URI에 movie의 id값을 넣어서 요청해야 함
             serializer.save(user=request.user, movie=movie)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -219,36 +243,28 @@ def photo_ticket_list(request):
     return Response(data)
 
 
-# 포토티켓 생성(추가)
-@api_view(['POST'])
+# 포토티켓 단일 조회, 생성(추가), 삭제
+@api_view(['GET', 'POST', 'DELETE'])
 @authentication_classes([JSONWebTokenAuthentication])
 @permission_classes([IsAuthenticated])
-def photo_ticket_create(request, movie_pk):
-    movie = get_object_or_404(Movie, pk=movie_pk)
-    if request.method == 'POST':
+def photo_ticket(request, movie_pk):
+    if request.method == 'GET':
+        photo_ticket = PhotoTicket.objects.filter(user__pk=request.user.pk, movie__pk=movie_pk).first()
+        serializer = PhotoTicketSerializer(photo_ticket)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        movie = get_object_or_404(Movie, pk=movie_pk)
         serializer = PhotoTicketSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user, movie=movie, poster_path=movie.poster_path, title=movie.title)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-# 포토티켓 삭제, 수정(소감 수정)
-@api_view(['PUT', 'DELETE'])
-@authentication_classes([JSONWebTokenAuthentication])
-@permission_classes([IsAuthenticated])
-def photo_ticket_detail(request, photo_ticket_pk):
-    photo_ticket = get_object_or_404(PhotoTicket, pk=photo_ticket_pk)
-    if request.method == 'DELETE':
+    elif request.method == 'DELETE':
+        photo_ticket = PhotoTicket.objects.filter(user__pk=request.user.pk, movie__pk=movie_pk).first()
         photo_ticket.delete()
         data = {
-            'delete' : f'{photo_ticket_pk}번 포토티켓이 삭제되었습니다.'
+            'delete' : '포토티켓이 삭제되었습니다.'
         }
         return Response(data, status=status.HTTP_204_NO_CONTENT)
-    elif request.method == 'PUT':
-        serializer = PhotoTicketSerializer(photo_ticket, data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data)
 
 
 # admin용 api - DB 구성 (장르 - 영화 - 감독, 배우 API 순으로 요청)

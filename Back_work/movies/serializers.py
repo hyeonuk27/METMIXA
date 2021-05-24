@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Movie, Review, Genre, Comment, PhotoTicket, Rate, RecommendAlgoScore
+from .models import Director, Actor, Movie, Review, Genre, Comment, PhotoTicket, Rate, RecommendAlgoScore
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -88,3 +88,17 @@ class RecommendAlgoScoreSerializer(serializers.ModelSerializer):
         model = RecommendAlgoScore
         fields = ('id', 'user', 'genre', 'rate',)
         read_only_fields = ('user', 'genre',)
+
+
+class DirectorSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Director
+        fields = ('id', 'name',)
+
+
+class ActorSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Actor
+        fields = ('id', 'name',)

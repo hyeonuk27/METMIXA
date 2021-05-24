@@ -34,9 +34,10 @@ def profile(request):
         serializer = UserProfileSerializer(request.user)
         return Response(serializer.data)
     elif request.method == 'PUT':
+        image = request.data.get('image')
         serializer = UserProfileSerializer(request.user, data=request.data)
         if serializer.is_valid(raise_exception=True):
-            serializer.save()
+            serializer.save(image=image)
             return Response(serializer.data)
     elif request.method == 'DELETE':
         user_pk = request.user.pk
