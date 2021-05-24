@@ -105,19 +105,22 @@ def review_list(request, movie_pk):
 @permission_classes([IsAuthenticated])
 def review_detail(request, review_pk):
     review = get_object_or_404(Review, pk=review_pk)
-    # 리뷰 제거
-    if request.method == 'DELETE':
-        review.delete()
-        data = {
-            'delete' : f'{review_pk}번 리뷰가 삭제되었습니다.'
-        }
-        return Response(data, status=status.HTTP_204_NO_CONTENT)
-    # 리뷰 수정
-    elif request.method == 'PUT':
-        serializer = ReviewSerializer(review, data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data)
+    # request.user와 review.user와 같지 않으면 수정 삭제 불가
+    if request.user == review.user:
+        # 리뷰 제거
+        if request.method == 'DELETE':
+            review.delete()
+            data = {
+                'delete' : f'{review_pk}번 리뷰가 삭제되었습니다.'
+            }
+            return Response(data, status=status.HTTP_204_NO_CONTENT)
+        # 리뷰 수정
+        elif request.method == 'PUT':
+            serializer = ReviewSerializer(review, data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(serializer.data)
+    return Response({ 'Unauthorized': '권한이 없습니다.'}, status=status.HTTP_403_FORBIDDEN)
 
 
 # 댓글 조회, 생성
@@ -225,7 +228,7 @@ def photo_ticket_create(request, movie_pk):
     if request.method == 'POST':
         serializer = PhotoTicketSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user, movie=movie, poster_path=movie.poster_path)
+            serializer.save(user=request.user, movie=movie, poster_path=movie.poster_path, title=movie.title)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 

@@ -70,8 +70,8 @@ class PhotoTicketSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PhotoTicket
-        fields = ('id', 'user', 'movie', 'message', 'poster_path',)
-        read_only_fields = ('user', 'movie', 'poster_path',)
+        fields = ('id', 'user', 'movie', 'title', 'poster_path',)
+        read_only_fields = ('user', 'movie', 'poster_path', 'title',)
 
 
 class RateSerializer(serializers.ModelSerializer):

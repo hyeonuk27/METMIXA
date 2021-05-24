@@ -236,7 +236,7 @@ Temporary Items
 # SageMath parsed files
 
 # Environments
-# .env
+.env
 
 # Spyder project settings
 
