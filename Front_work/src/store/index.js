@@ -62,7 +62,6 @@ export default new Vuex.Store({
       // const config = {
       //   'Content-Type': 'multipart/form-data',
       // }
-      console.log(credentials)
       axios({
         url: SERVER.URL + SERVER.ROUTES.signup,
         method: 'post',
@@ -78,12 +77,12 @@ export default new Vuex.Store({
       })
     },
     fetchVideos: function ({ commit }, movie_id) {
+      console.log('불러옴')
       axios({
         url: `https://api.themoviedb.org/3/movie/${movie_id}/videos?api_key=${process.env.VUE_APP_TMDB_API_KEY}&region=KR&language=ko`,
         method: 'get', 
       })
       .then((res) => {
-        console.log(res.data.results[0].key)
         commit('SET_VIDEO_KEY', res.data.results[0].key)
       })
       .catch((err) => {

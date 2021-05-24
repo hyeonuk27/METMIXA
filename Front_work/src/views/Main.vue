@@ -1,7 +1,7 @@
 <template>
   <div id='Main'>
     <h1 id='logo' @click="uncheck">METMIXA</h1>
-    <iframe width="1920" height="1080" :src="videoURI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <iframe width="854" height="480" :src="videoURI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     <!-- <img id="bg" :src="movieList[0].backdrop_path" alt=""> -->
     <input type="checkbox" id="my-menu"><label for="my-menu"><img src="@/assets/default_profile.jpg"></label>
     <div class="sidebar">
@@ -12,7 +12,7 @@
         <span>로그아웃</span>
       </div>
     </div>
-    <MovieList class="mt-5" :movieList="movieList"/>
+    <MovieList :movieList="movieList" @click.native="uncheck"/>
   </div>
 </template>
 

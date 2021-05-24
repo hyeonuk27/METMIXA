@@ -15,6 +15,7 @@
         </div>
       </div>
     </div>
+    <h1 style="color: #f1f1f1; opacity: 0.7; font-size: 7rem; margin-top: 6rem;">METMIXA</h1>
     <div class="signup">
       <el-card class="signup-card pb-1">
         <h2>Signup</h2>
@@ -59,7 +60,7 @@
           </el-form-item> -->
           <el-form-item>
             <el-button
-              class="signup-button"
+              id="signup-button"
               type="primary"
               native-type="submit"
               block
@@ -157,10 +158,10 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 12rem;
+  padding-top: 4rem;
 }
 
-.signup-button {
+#signup-button {
   width: 100%;
   margin-top: 40px;
   padding: 14px 20px;
@@ -186,7 +187,7 @@ export default {
 
 <style lang="scss">
 $teal: rgba(71, 63, 113, 0.8);
-.signup-button--primary {
+#signup-button {
   background: $teal;
   border-color: $teal;
 

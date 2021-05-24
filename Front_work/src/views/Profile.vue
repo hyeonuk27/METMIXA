@@ -1,6 +1,5 @@
 <template>
   <div id="profile_main">
-    <button id="go_back" @click="$router.push({ name: 'Main'})"><i class="fas fa-arrow-left fa-2x"></i></button>
     <!-- 유저 이름, 닉네임, 사진 -->
     <UserInfo
     class="d-block"
@@ -15,7 +14,7 @@
             <!-- item은 포토티켓 객체. movie_id는 movie라는 이름으로 접근 -->
             <div class="item photo_ticket d-inline-block" @click="$router.push({ name: 'Detail', query: { moviePk: `${item.movie}`}})">
               <img id="image" :src="item.poster_path" class="card-img-top d-inline-block" alt="...">
-              <p>{{ item.title }}</p>
+              <p class="text-center" style="padding-top: 0.4rem;">{{ item.title }}</p>
             </div>
           </template>
       </vue-masonry-wall>
@@ -156,12 +155,4 @@ export default {
   outline: 0;
   overflow: hidden;
 }
-
-#go_back {
-  position: fixed;
-  left: 20px;
-  top: 20px;
-  color: rgba(255, 255, 255, 0.82);
-}
-
 </style>

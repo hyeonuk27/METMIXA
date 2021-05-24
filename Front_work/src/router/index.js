@@ -56,11 +56,12 @@ router.beforeEach((to, from, next) => {
   const authPages = [
     'Main',
     'Profile',
+    'Detail',
   ]
   // 1-2. 로그아웃이 필요한 컴포넌트
   const publicPages = [
     'Login',
-    'Signup,'
+    'Signup',
   ]
 
   // 2. 

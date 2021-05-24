@@ -3,7 +3,7 @@
     <header id="header">
       <span class="avatar">
         <img v-if="image" :src="image" alt="" />
-        <img v-else src="http://127.0.0.1:8000/media/profile_images/2021/05/21/default_profile.jpg" alt="" />
+        <img v-else src="@/assets/default_profile.jpg" alt="" />
       </span>
       <h2>{{ nickname }}님의 공간</h2>
     </header>

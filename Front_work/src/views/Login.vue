@@ -15,6 +15,7 @@
         </div>
       </div>
     </div>
+    <h1 style="color: #f1f1f1; opacity: 0.7; font-size: 7rem; margin-top: 6rem;">METMIXA</h1>
     <div class="login">
       <el-card class="login-card pb-1">
         <h2>Login</h2>
@@ -38,7 +39,7 @@
           </el-form-item>
           <el-form-item>
             <el-button
-              class="login-button"
+              id="login-button"
               type="primary"
               native-type="submit"
               block
@@ -100,10 +101,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 14rem;
+  padding-top: 6rem;
 }
 
-.login-button {
+#login-button {
   width: 100%;
   margin-top: 40px;
   padding: 14px 20px;
@@ -130,7 +131,7 @@
 
 <style lang="scss">
 $teal: rgba(71, 63, 113, 0.8);
-.login-button--primary {
+#login-button {
   background: $teal;
   border-color: $teal;
 
