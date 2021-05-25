@@ -118,6 +118,9 @@ export default new Vuex.Store({
       })
       .catch((err) => {
         console.log(err)
+        swal ("일치하는 닉네임이 존재합니다!", {
+          dangerMode: true,
+        })
       })
     },
     fetchVideos: function ({ commit }, movie_id) {

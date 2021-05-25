@@ -82,4 +82,9 @@ router.beforeEach((to, from, next) => {
   } else {
     next()
   }
+
+  if ((from.name === 'Main' && to.name === 'Login') || (from.name === 'Login' && to.name === 'Signup') || (from.name === 'Signup' && to.name === 'Login')) {
+    next()
+    window.location.reload()
+  }
 })

@@ -12,6 +12,9 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import { BCard } from 'bootstrap-vue'
 import ElementUI from "element-ui";
 import Carousel3d from 'vue-carousel-3d';
+import Vuesax from 'vuesax'
+import 'vuesax/dist/vuesax.css'
+import 'material-icons/iconfont/material-icons.css'
 
 
 Vue.config.productionTip = false
@@ -21,6 +24,7 @@ Vue.component('b-card', BCard)
 Vue.use(ElementUI);
 Vue.config.productionTip = false;
 Vue.use(Carousel3d)
+Vue.use(Vuesax)
 
 new Vue({
   created() {

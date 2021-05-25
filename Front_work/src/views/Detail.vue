@@ -3,7 +3,7 @@
     <!-- 배경 -->
     <img id="bg-backdrop" :src="this.selectedMovieInfo.backdrop_path" alt="" :style="{ width: windowWidth }">
     <div id="bg-cover" :style="{ width: windowWidth }"></div>
-    <img id="poster" :src="this.selectedMovieInfo.poster_path" rounded alt="" style="width: 300px;">
+    <img id="poster" :src="this.selectedMovieInfo.poster_path" rounded alt="" style="width: 300px; border-radius: 7px;">
     
     <div id="info-div">
       <h1 id="movie-title" class="text-white text-start">{{ this.selectedMovieInfo.title }}</h1>
@@ -30,10 +30,10 @@
           @change="giveRate">
         </el-rate>
         <el-tooltip :content="tooltip" placement="right">
-          <v-btn v-if="!isPhototicket" icon id="add-photo-ticket-icon" @click="addMyPhototicket" class="ms-2">
+          <v-btn v-if="!isPhototicket" icon id="add-photo-ticket-icon" @click="addMyPhototicket" @mousedown="$vs.notify({title:'포토티켓 추가!',text:'이제 내 프로필에서 언제든 확인할 수 있어요', color:'danger', icon:'favorite'})" class="ms-2">
             <v-icon>mdi-heart</v-icon>
           </v-btn>
-          <v-btn v-else icon id="remove-photo-ticket-icon" @click="removeMyPhototicket" class="ms-2">
+          <v-btn v-else icon id="remove-photo-ticket-icon" @click="removeMyPhototicket" @mousedown="$vs.notify({title:'포토티켓 삭제...',text:'다시 한 번 눌러주실거죠? 😥', color:'warning', icon:'delete'})" class="ms-2">
             <v-icon>mdi-heart</v-icon>
           </v-btn>
         </el-tooltip>
@@ -54,24 +54,50 @@
     
     <div id="review">
       <!-- 리뷰 작성 -->
-      <div class="chat-container" style="background-color: rgba(255, 255, 255, 0.9);">
-        <i class="el-icon-edit fs-5" style="margin-top: 3px; margin-left: 0.5rem; margin-right: 2rem;"></i>
-        <input class="review-container" v-model="commentText" @keypress.enter="writeComment" placeholder="한 줄 평 작성" style="background-color: rgba(255, 255, 255, 0);">
+      <div class="chat-container" style="background-color: rgba(255, 255, 255, 0.9); height: 65px">
+        <vs-input icon="mode_edit" class="inputx review-input text-start" v-model="reviewText" @keypress.enter="createReview"/>
       </div>
-      <div v-for="(review, idx) in reviews" :key="idx" class="chat-container d-flex align-items-center" style="background-color: rgba(255, 255, 255, 0.9);">
-        <img src="https://picsum.photos/1000/1000" alt="Avatar" style="width:100%; margin-left: 10px;">
-        <!-- 너무 긴 코멘트가 적힐 경우 짤리지 않도록 처리해줘야한다 -->
-        <p class="m-0 text-truncate text-start">{{ review.content }}</p>
-        <span>{{ review.created_at }}</span>
-        <span>{{ review.updated_at }}</span>
-        <el-button type="danger" icon="el-icon-delete" circle @click="deleteComment(review.id, idx)" style="margin-left: 110px;"></el-button>
-      </div>
+      <vs-collapse accordion class="p-0">
+        <div v-for="(review, idx) in reviews" :key="idx" class="chat-container d-flex align-items-center" style="background-color: rgba(255, 255, 255, 0.9);"  @click="setComment(review)">
+          <vs-collapse-item icon-arrow="false" class="w-100">
+            <div slot="header">
+              <img :src="SERVER_URL+review.user.image" alt="Avatar" style="width:100%; margin-left: 10px;">
+              <span>{{ review.user.nickname }}</span>
+              <!-- 너무 긴 코멘트가 적힐 경우 짤리지 않도록 처리해줘야한다 -->
+              <p class="m-0 text-truncate text-start">{{ review.content }}</p>
+              <span>생성 {{ humanize(review.created_at) }}</span>
+              <span>수정 {{ humanize(review.updated_at) }}</span>
+              <el-tooltip content="리뷰 삭제" placement="right">
+                <v-btn v-if="review.user.nickname === nickname" icon id="icon" @click="deleteReview(review.id, idx)" style="background-color: rgba(255, 255, 255, 0); margin-left: 110px;">
+                  <v-icon>mdi-minus</v-icon>
+                </v-btn>
+              </el-tooltip>
+            </div>
+
+            <!-- 댓글들 -->
+            <div>
+              <p class="text-start" style="word-break: break-all;">{{ review.content }}</p>
+              <vs-input icon="mode_edit" class="inputx review-input text-start" v-model="commentText" @keypress.enter="createComment(review.id)"/>
+              <div v-for="(comment, idx) in comments" :key="idx" class="chat-container d-flex align-items-center" style="background-color: rgba(255, 255, 255, 0.9);">
+                <div class="centerx default-input">
+                  <img :src="SERVER_URL+comment.user.image" alt="Avatar" style="width:100%; margin-left: 10px;">
+                  <span>{{ comment.user.nickname }}</span>
+                  <p class="m-0 text-truncate text-start">{{ comment.content  }}</p>
+                  <el-button type="danger" icon="el-icon-delete" circle @click="deleteComment(comment.id, idx)" style="margin-left: 110px;"></el-button>
+                </div>
+              </div>
+            </div>
+          </vs-collapse-item>
+        </div>
+      </vs-collapse>
     </div>
   </div>
 </template>
 <script>
 import axios from 'axios'
 import SERVER from '@/api/drf.js'
+import { mapState } from 'vuex'
+import swal from 'sweetalert'
 
 export default {
   name: 'Detail',
@@ -81,10 +107,12 @@ export default {
       originalRate: '',
       currentRate: 1,
       colors: ['#99A9BF', '#F7BA2A', '#FF9900'],
+      reviewText: '',
       commentText: '',
       selectedMovie: '',
       selectedMovieInfo: {},
       reviews: [],
+      comments: [],
       windowWidth: parseInt(screen.availWidth)+"px",
       isPhototicket: false,
       tooltip: '',
@@ -92,6 +120,7 @@ export default {
       actors: [],
       pageNum: 1,
       possiblePageNum: 2,
+      SERVER_URL: SERVER.URL,
     }
   },
   methods: {
@@ -106,6 +135,7 @@ export default {
         },
       })
       .then((res)=>{
+        console.log(res.data)
         this.possiblePageNum = res.data.pop()['possible_page']
         this.reviews.push(...res.data)
         this.pageNum += 1
@@ -119,27 +149,27 @@ export default {
         }
       }
     },
-    writeComment() {
-      const content = this.commentText
+    // 리뷰 생성
+    createReview: function () {
+      const content = this.reviewText
       axios({
         method: 'post',
         url: `${SERVER.URL}/api/v1/movies/${this.selectedMovie}/reviews/`,
         headers: this.$store.getters.config,
         data: {
-          content
+          content,
         }
       })
-      // 리뷰 생성 성공
       .then(res => {
         this.reviews.unshift(res.data)
-        this.commentText = ''
+        this.reviewText = ''
       })
       .catch(err => {
         console.log(err)
       })
     },
     // 리뷰 제거
-    deleteComment(reviewPk, idx) {
+    deleteReview: function (reviewPk, idx) {
       axios({
         method: 'delete',
         url: `${SERVER.URL}/api/v1/reviews/${reviewPk}`,
@@ -151,11 +181,45 @@ export default {
       })
       .catch(err => {
         console.log(err)
-        alert('권한이 없습니다!')
+        swal ("자신의 리뷰만 지워주세요!", {
+          dangerMode: true,
+        })
+      })
+    },
+    // 댓글 세팅
+    setComment: function (review) {
+      // 댓글창이 v-model로 모두 공유하기 때문데 다른 리뷰를 클릭할 때마다 초기화
+      this.commentText = ''
+      axios({
+        method: 'get',
+        url: `http://127.0.0.1:8000/api/v1/reviews/${review.id}/comments/`,
+        headers: this.$store.getters.config,
+      })
+      .then((res)=>{
+        console.log(res.data)
+        this.comments = res.data
+      })
+    },
+    // 댓글 생성
+    createComment: function (reviewPk) {
+      axios({
+        method: 'post',
+        url: `${SERVER.URL}/api/v1/reviews/${reviewPk}/comments/`,
+        headers: this.$store.getters.config,
+        data: {
+          content: this.commentText,
+        }
+      })
+      .then((res) => {
+        this.comments.unshift(res.data)
+        this.commentText = ''
+      })
+      .catch(err => {
+        console.log(err)
       })
     },
     // 별점 주기
-    giveRate() {
+    giveRate: function () {
       const rate = this.currentRate
       // 별점을 이미 줬으면 put
       if (this.originalRate) {
@@ -221,6 +285,12 @@ export default {
       .catch(err => {
         console.log(err)
       })
+    },
+    humanize: function (date) {
+      const moment = require('moment')
+      const created = moment(date).format('YYYY-MM-DD')
+      console.log(created)
+      return created
     }
   },
   // main page에서 카드를 눌렀을 때 detail page로 이동된 것
@@ -307,10 +377,15 @@ export default {
       vote_average: function () {
         const result = ((this.selectedMovieInfo.tmdb_vote_sum + this.selectedMovieInfo.our_vote_sum*2) / (this.selectedMovieInfo.tmdb_vote_cnt + this.selectedMovieInfo.our_vote_cnt)).toFixed(1)
         return result*10
-      }
+      },
+      ...mapState([
+        'nickname',
+        'image',
+      ])
     }
 }
 </script>
+
 <style>
 #bg-cover {
   position: fixed; 
@@ -388,12 +463,8 @@ export default {
   margin: 10px 0;
 }
 .chat-container p {
-  width: 80%;
+  width: 50%;
   display: inline-block;
-}
-.darker {
-  border-color: #ccc;
-  background-color: #ddd;
 }
 .chat-container::after {
   content: "";
@@ -412,17 +483,15 @@ export default {
   margin-left: 20px;
   margin-right:0;
 }
-.time-right {
-  float: right;
-  color: #aaa;
-}
-.time-left {
-  float: left;
-  color: #999;
-}
-.review-container {
+.review-input {
   width: 90% !important;
   display: inline !important;
   margin-left: 0rem;
-}
+}  
+</style>
+
+<style lang="stylus">
+.default-input
+  .inputx
+    margin 10px
 </style>
