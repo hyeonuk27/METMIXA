@@ -7,32 +7,33 @@
 " class="d-block w-100" alt="...">
         </div>
         <div class="carousel-item" data-bs-interval="4000">
-          <img src="https://www.themoviedb.org/t/p/w1066_and_h600_bestv2/nyuzfjAbuSel6dVKY4zFo95ugUf.jpg
+          <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbwBmBj%2FbtqzlkqsFRT%2FDdWgcmONokKV2w3e5JGnZ0%2Fimg.jpg
 " class="d-block w-100" alt="...">
         </div>
         <div class="carousel-item" data-bs-interval="4000">
-          <img src="https://www.themoviedb.org/t/p/w1066_and_h600_bestv2/27IQ08XLxw2Gaj5zoOmJWmq4nNy.jpg" class="d-block w-100" alt="...">
+          <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FcfyMPk%2FbtqzjJSVxwa%2F585yMvmx8k0morUKKgEkB1%2Fimg.jpg" class="d-block w-100" alt="...">
         </div>
       </div>
     </div>
-    <h1 style="color: #f1f1f1; opacity: 0.7; font-size: 7rem; margin-top: 6rem;">METMIXA</h1>
+    <img style="color: #f1f1f1; font-size: 7rem; width: 20rem;" src="../assets/logo_transparent.png">
     <div class="login">
       <el-card class="login-card pb-1">
-        <h2>Login</h2>
+        <span style="color: #f1f1f1; opacity: 0.7;">"나의 죽음이 나의 삶보다 가취 있기를"</span><br><br>
+        <span style="color: #f1f1f1; opacity: 0.7;">-영화 '조커' 中</span><br>
         <el-form
-          class="login-form"
+          class="login-form mt-3"
           :model="credentials"
           :rules="rules"
           ref="form"
           @submit.native.prevent="login(credentials)"
         >
           <el-form-item prop="username">
-            <el-input v-model="credentials.username" placeholder="Username" prefix-icon="fas fa-user"></el-input>
+            <el-input v-model="credentials.username" placeholder="아이디" prefix-icon="fas fa-user"></el-input>
           </el-form-item>
           <el-form-item prop="password">
             <el-input
               v-model="credentials.password"
-              placeholder="Password"
+              placeholder="비밀번호"
               type="password"
               prefix-icon="fas fa-lock"
             ></el-input>
@@ -43,7 +44,7 @@
               type="primary"
               native-type="submit"
               block
-            ><span style="color: rgba(255, 255, 255, 0.82);">Login</span></el-button>
+            ><span style="color: rgba(255, 255, 255, 0.82);">로그인</span></el-button>
           </el-form-item>
           <h6 class="signup-router text-secondary p-0" @click="$router.push({ name: 'Signup'})">회원가입</h6>
         </el-form>
@@ -101,7 +102,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 6rem;
 }
 
 #login-button {

@@ -3,39 +3,41 @@
     <div id="bg" class="carousel slide" :style="{ width: windowWidth }" data-bs-ride="carousel">
       <div class="carousel-inner">
         <div class="carousel-item active" data-bs-interval="4000">
-          <img src="https://www.themoviedb.org/t/p/w1066_and_h600_bestv2/2nbKZ5RWFSvjq5IGVRcz8kAolmw.jpg
+          <img src="https://i.pinimg.com/originals/a4/04/3e/a4043e1c09a7c1cdb94f6e9a84c2e507.jpg
 " class="d-block w-100" alt="...">
         </div>
         <div class="carousel-item" data-bs-interval="4000">
-          <img src="https://www.themoviedb.org/t/p/w1066_and_h600_bestv2/nyuzfjAbuSel6dVKY4zFo95ugUf.jpg
+          <img src="https://pds.joins.com/news/component/htmlphoto_mmdata/201701/09/htm_20170109115141307904.jpg
 " class="d-block w-100" alt="...">
         </div>
         <div class="carousel-item" data-bs-interval="4000">
-          <img src="https://www.themoviedb.org/t/p/w1066_and_h600_bestv2/27IQ08XLxw2Gaj5zoOmJWmq4nNy.jpg" class="d-block w-100" alt="...">
+          <img src="https://an2-img.amz.wtchn.net/image/v2/22ea1094cfdf39a5fa3d168e5ae89343.jpg?jwt=ZXlKaGJHY2lPaUpJVXpJMU5pSjkuZXlKaVlXTnJaM0p2ZFc1a0lqcDdJbklpT2pJMU5Td2laeUk2TWpVMUxDSmlJam95TlRWOUxDSmpjbTl3SWpwMGNuVmxMQ0pvWldsbmFIUWlPakV3T0RBc0luQmhkR2dpT2lJdmRqSXZjM1J2Y21VdmFXMWhaMlV2TVRZeE5UZ3pNakUzTnpJNU5UWXlNelF4T1NJc0luRjFZV3hwZEhraU9qZ3dMQ0ozYVdSMGFDSTZNVGt5TUgwLjB1SmN4WnVrUTVFNDFYVURkeEtyNk1RTzA2a25RWUxiQmRWYzBGNGpuQm8" class="d-block w-100" alt="...">
         </div>
       </div>
     </div>
-    <h1 style="color: #f1f1f1; opacity: 0.7; font-size: 7rem; margin-top: 6rem;">METMIXA</h1>
+    <img style="color: #f1f1f1; font-size: 7rem; width: 20rem;" src="../assets/logo_transparent.png">
     <div class="signup">
       <el-card class="signup-card pb-1">
-        <h2>Signup</h2>
+        <span style="color: #f1f1f1; opacity: 0.7;">"우린 어디쯤 있는 거지?"</span><br>
+        <span style="color: #f1f1f1; opacity: 0.7;">"그냥 흘러가는 대로 가보자"</span><br><br>
+        <span style="color: #f1f1f1; opacity: 0.7;">-영화 '라라랜드' 中</span><br>
         <el-form
-          class="signup-form"
+          class="signup-form mt-3"
           :model="credentials"
           :rules="rules"
           ref="form"
           @submit.native.prevent="onUpload"
         >
           <el-form-item prop="nickname">
-            <el-input v-model="credentials.nickname" placeholder="Nickname" prefix-icon="fas fa-user"></el-input>
+            <el-input v-model="credentials.nickname" placeholder="닉네임" prefix-icon="fas fa-user"></el-input>
           </el-form-item>
           <el-form-item prop="username">
-            <el-input v-model="credentials.username" placeholder="Username" prefix-icon="fas fa-user"></el-input>
+            <el-input v-model="credentials.username" placeholder="아이디" prefix-icon="fas fa-user"></el-input>
           </el-form-item>
           <el-form-item prop="password">
             <el-input
               v-model="credentials.password"
-              placeholder="Password"
+              placeholder="비밀번호"
               type="password"
               prefix-icon="fas fa-lock"
             ></el-input>
@@ -43,7 +45,7 @@
           <el-form-item prop="passwordCofirmation">
             <el-input
               v-model="credentials.passwordConfirmation"
-              placeholder="Password Cofirmation"
+              placeholder="비밀번호 확인"
               type="password"
               prefix-icon="fas fa-lock"
             ></el-input>
@@ -64,7 +66,7 @@
               type="primary"
               native-type="submit"
               block
-            ><span style="color: rgba(255, 255, 255, 0.82);">Signup</span></el-button>
+            ><span style="color: rgba(255, 255, 255, 0.82);">회원가입</span></el-button>
           </el-form-item>
           <h6 class="greeting text-secondary">METMIXA는 당신을 기다립니다.</h6>
         </el-form>
@@ -90,7 +92,6 @@ export default {
         username: '',
         password: '',
         passwordConfirmation: '',
-        // image: '',
       },
       windowWidth: parseInt(screen.availWidth)+"px",
       rules: {
@@ -114,7 +115,7 @@ export default {
         passwordConfirmation: [
           { required: true, message: "Password Confirmation is required", trigger: "blur" },
         ]
-      }
+      },
     }
   },
   methods: {
@@ -135,7 +136,7 @@ export default {
       // console.log(this.credentials.image)
       this.signup(this.credentials)
     }
-  }
+  },
 }
 </script>
 <style>
@@ -146,21 +147,15 @@ export default {
   left: 0; 
   margin: auto;
 }
-.signupBtn:hover {
-  opacity: 0.6;
-}
 .container {
   padding: 16px;
 }
-
 .signup {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 4rem;
 }
-
 #signup-button {
   width: 100%;
   margin-top: 40px;

@@ -37,6 +37,7 @@ export default {
       selectedMovieId: '',
       vote_average: 0,
       title: '',
+      afterSlide: 0,
     }
   },
   props: {
@@ -52,14 +53,17 @@ export default {
     ...mapActions([
       'fetchVideos',
     ]),
-    play() {
+    play(event) {
       var audio = new Audio(require('/src/assets/moviesound.mp3'));
-      audio.play()
-      .catch(err => {
-        console.log(err)
-      })
+      if (Math.abs(this.afterSlide - event) > 0 && Math.abs(this.afterSlide - event) < 4){
+        audio.play()
+        .catch(err => {
+          console.log(err)
+        })
+      }
     },
     setSelectedMovieId: function (event) {
+      this.afterSlide = event
       const movie = this.movieList[event]
       this.selectedMovieId = movie.id
       let average = ((movie.tmdb_vote_sum + movie.our_vote_sum*2) / (movie.tmdb_vote_cnt + movie.our_vote_cnt)).toFixed(1)
@@ -93,7 +97,7 @@ export default {
   width: 100%;
   transform: rotateX(10deg);
   /* transform: rotateY(0) */
-  opacity: 0.7;
+  opacity: 0.5;
   transition: 0.3s;
 }
 

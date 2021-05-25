@@ -1,14 +1,18 @@
 <template>
   <div id='Main'>
-    <h1 id='logo' @click="uncheck">METMIXA</h1>
+    <h1 id='logo'>METMIXA</h1>
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0;" @click="uncheck"></div>
     <iframe width="854" height="480" :src="videoURI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    <!-- <img id="bg" :src="movieList[0].backdrop_path" alt=""> -->
-    <input type="checkbox" id="my-menu"><label for="my-menu"><img src="@/assets/default_profile.jpg"></label>
+    <input type="checkbox" id="my-menu">
+    <label for="my-menu">
+      <img v-if="image === SERVER_URL+'null'" src="@/assets/default_profile.jpg">
+      <img v-else :src="image">
+    </label>
     <div class="sidebar">
-      <div id="menu1" class="menu mb-2 text-start fw-bold" @click="$router.push({ name: 'Profile' })">
-        <span>포토티켓</span>
+      <div id="menu1" class="menu mb-3 text-end fw-bold" @click="$router.push({ name: 'Profile' })">
+        <span>내 프로필</span>
       </div>
-      <div class="menu text-start fw-bold" @click="logout">
+      <div class="menu text-end fw-bold" @click="logout">
         <span>로그아웃</span>
       </div>
     </div>
@@ -17,9 +21,10 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapState, mapActions, mapGetters } from 'vuex'
 import axios from 'axios'
 import MovieList from '@/components/MainPage/MovieList'
+import SERVER from '@/api/drf.js'
 
 export default {
   name: 'Main',
@@ -29,6 +34,7 @@ export default {
   data() {
     return {
       movieList: [],
+      SERVER_URL: SERVER.URL,
     }
   },
   methods: {
@@ -42,6 +48,9 @@ export default {
     },
   },
   computed: {
+    ...mapState([
+      'image',
+    ]),
     ...mapGetters([
       'config',
       'videoURI'
@@ -105,7 +114,7 @@ input[type=checkbox] {
 }
 
 div[class=sidebar] {
-  width: 200px;
+  width: 170px;
   height: 100%;
   background: #222;
   opacity: 0.95;
@@ -121,11 +130,11 @@ input[type=checkbox]:checked + label + div {
 }
 
 #menu1 {
-  margin-top: 6rem;
+  margin-top: 6.5rem;
 }
 
 .menu {
-  margin-left: 1rem;
+  margin-right: 2.1rem;
   color: #818181;
   cursor: pointer;
   font-size: 1.2rem;

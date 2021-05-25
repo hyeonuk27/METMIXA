@@ -3,8 +3,6 @@
     <!-- 유저 이름, 닉네임, 사진 -->
     <UserInfo
     class="d-block"
-    :nickname="nickname"
-    :image="image"
     />
     <!-- 유저 정보 변경을 위한 modal-->
     <!-- v-for로 반복 돌리기 -->
@@ -43,26 +41,9 @@ export default {
         photoTickets: [],
         pageNum: 1,
         possiblePageNum: 2,
-        nickname: '',
-        image: '',
     }
   },
   methods: {
-    getProfiles: function () {
-      axios({
-        method: 'get',
-        url: 'http://127.0.0.1:8000/api/v2/profile/',
-        headers: this.config,
-      })
-      .then((res) => {
-        console.log(res.data)
-        this.nickname = res.data.nickname
-        this.image = res.data.image
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-    },
     getMovies: function () {
       axios({
         method: 'get',
@@ -99,7 +80,6 @@ export default {
   },
   created: function () {
     this.getMovies()
-    this.getProfiles()
     document.addEventListener('scroll', this.checkBottom)
   }
 }
