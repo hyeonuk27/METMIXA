@@ -177,19 +177,21 @@ def comment_list(request, review_pk):
 @permission_classes([IsAuthenticated])
 def comment_detail(request, comment_pk):
     comment = get_object_or_404(Comment, pk=comment_pk)
-    # 댓글 제거
-    if request.method == 'DELETE':
-        comment.delete()
-        data = {
-            'delete' : f'{comment_pk}번 댓글이 삭제되었습니다.'
-        }
-        return Response(data, status=status.HTTP_204_NO_CONTENT)
-    # 댓글 수정
-    elif request.method == 'PUT':
-        serializer = CommentSerializer(comment, data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data)
+    if request.user == comment.user:
+        # 댓글 제거
+        if request.method == 'DELETE':
+            comment.delete()
+            data = {
+                'delete' : f'{comment_pk}번 댓글이 삭제되었습니다.'
+            }
+            return Response(data, status=status.HTTP_204_NO_CONTENT)
+        # 댓글 수정
+        elif request.method == 'PUT':
+            serializer = CommentSerializer(comment, data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(serializer.data)
+    return Response({ 'Unauthorized': '권한이 없습니다.'}, status=status.HTTP_403_FORBIDDEN)
 
 
 # 내가 특정 영화에 준 평점 + 유저장르점수 중개테이블 **동시에 두 테이블이 채워지고 업데이트 되는 로직(매직)

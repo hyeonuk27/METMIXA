@@ -52,25 +52,27 @@
         <h6 class="col-4">{{ actors[1] }}</h6>
       </div>
     </div>
-    <div id="review">
+    <div id="review" class="pb-5">
       <!-- 리뷰 작성 -->
       <div class="chat-container" style="background-color: rgba(255, 255, 255, 0.9); height: 65px; padding: 10px;">
         <vs-input icon="mode_edit" class="inputx review-input text-start" v-model="reviewText" @keypress.enter="createReview"/>
       </div>
       <vs-collapse accordion class="p-0">
-        <div v-for="(review, idx) in reviews" :key="idx" class="chat-container d-flex align-items-center" style="background-color: rgba(255, 255, 255, 0.9); transition: 0.3s"  @click="setComment(review)">
+        <div v-for="(review, idx) in reviews" :key="idx" class="chat-container d-flex align-items-center" style="background-color: rgba(255, 255, 255, 0.9); transition: 0.3s">
           <vs-collapse-item class="w-100">
             <div slot="header" class="d-flex justify-content-start align-items-center">
               <img :src="SERVER_URL+review.user.image" alt="Avatar" style="width:100%; margin-left: 10px;">
-              <!-- 너무 긴 코멘트가 적힐 경우 짤리지 않도록 처리해줘야한다 -->
-              <p class="m-0 text-truncate text-start fw-bold" style="font-size: 17px;">{{ review.content }}</p>
+              <!-- 너무 긴 리뷰가 적힐 경우 ...으로 축약 -->
+              <span class="me-3">{{ review.user.nickname }}</span>
+              <p class="m-0 text-truncate text-start fw-bold" style="font-size: 17px; opacity: 0.8;">{{ review.content }}</p>
             </div>
 
-            <!-- 댓글들 -->
+            <!-- 본문 -->
             <div class="d-flex justify-content-between align-items-end">
-              <p class="text-start" style="word-break: break-all; margin-left: 10rem;">{{ review.content }}
+              <p class="text-start" style="word-break: break-all; margin-left: 15rem;">{{ review.content }}
                 <br><br>
-                <el-badge :value="review.comments_count" class="item" style="width: 1.2rem; height: 0rem; font-size: 20px;">
+                <span class="badge rounded-pill bg-danger" style="position: relative; top: 0.2rem; left: 1.8rem;">{{review.comments_count}}</span>
+                <el-badge :value="review.comments_count" class="item" style="width: 1.3rem; height: 0rem; font-size: 19px; position: relative;">
                   <i class="fas fa-comment" @mousedown="$router.push({ name: 'Comment', query: { movie: selectedMovie, review: review.id } })"></i>
                 </el-badge>
               </p>
@@ -177,37 +179,6 @@ export default {
         })
       })
     },
-    // 댓글 세팅
-    setComment: function (review) {
-      // 댓글창이 v-model로 모두 공유하기 때문데 다른 리뷰를 클릭할 때마다 초기화
-      this.commentText = ''
-      axios({
-        method: 'get',
-        url: `http://127.0.0.1:8000/api/v1/reviews/${review.id}/comments/`,
-        headers: this.$store.getters.config,
-      })
-      .then((res)=>{
-        this.comments = res.data
-      })
-    },
-    // 댓글 생성
-    createComment: function (reviewPk) {
-      axios({
-        method: 'post',
-        url: `${SERVER.URL}/api/v1/reviews/${reviewPk}/comments/`,
-        headers: this.$store.getters.config,
-        data: {
-          content: this.commentText,
-        }
-      })
-      .then((res) => {
-        this.comments.unshift(res.data)
-        this.commentText = ''
-      })
-      .catch(err => {
-        console.log(err)
-      })
-    },
     // 별점 주기
     giveRate: function () {
       const rate = this.currentRate
@@ -279,7 +250,7 @@ export default {
     },
     humanize: function (date) {
       const moment = require('moment')
-      const created = moment(date).format('YYYY-MM-DD')
+      const created = moment(date).format('YYYY.MM.DD\u00A0\u00A0HH:MM')
       return created
     }
   },
@@ -440,7 +411,6 @@ export default {
   left: 23.5rem;
   width: 70rem;
 }
-
 #Detail {
   background-color: #1414144b;
 }
@@ -451,7 +421,7 @@ export default {
   margin: 10px 0;
 }
 .chat-container p {
-  width: 50%;
+  width: 55%;
   display: inline-block;
 }
 .chat-container::after {
@@ -463,7 +433,7 @@ export default {
   float: left;
   max-width: 60px;
   width: 100%;
-  margin-right: 20px;
+  margin-right: 10px;
   border-radius: 50%;
 }
 .chat-container img.right {

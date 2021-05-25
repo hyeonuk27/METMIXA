@@ -12,8 +12,11 @@
       <div id="menu1" class="menu mb-3 text-end fw-bold" @click="$router.push({ name: 'Profile' })">
         <span>내 프로필</span>
       </div>
-      <div class="menu text-end fw-bold" @click="logout">
+      <div class="menu text-end fw-bold mb-3" @click="logout">
         <span>로그아웃</span>
+      </div>
+      <div v-if="nickname === '어드민'" class="menu text-end fw-bold">
+        <a href="http://127.0.0.1:8000/admin" class="text-decoration-none">관리자 페이지</a>
       </div>
     </div>
     <MovieList :movieList="movieList" @click.native="uncheck"/>
@@ -23,7 +26,7 @@
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex'
 import axios from 'axios'
-import MovieList from '@/components/MainPage/MovieList'
+import MovieList from '@/components/Main/MovieList'
 import SERVER from '@/api/drf.js'
 
 export default {
@@ -50,6 +53,7 @@ export default {
   computed: {
     ...mapState([
       'image',
+      'nickname',
     ]),
     ...mapGetters([
       'config',

@@ -52,9 +52,62 @@
         <h6 class="col-4">{{ actors[1] }}</h6>
       </div>
     </div>
-    <div id="comment">
-      <div style="width: 100%; height: 100px; background-color: rgb(231, 231, 230); border-radius: 5px;">
-        {{ selectedReviewInfo.content }}
+    
+    <!-- Review 정보 보여주기 -->
+    <div id="comment" class="pb-5">
+      <div style="width: 100%; background-color: rgb(231, 231, 230); border-radius: 5px;">
+        <div class="review-container" style="width: 100%; background-color: rgb(231, 231, 230); border-radius: 5px;">
+          <img :src="image" alt="">
+          <p class="text-start" style="padding-top: 2.7rem; padding-left: 6rem; margin-bottom: 2.7rem; opacity: 0.8;"><span class="fw-bold me-2">{{ nickname }}</span> | 
+            <span v-if="humanize(review.created_at) === humanize(review.updated_at)" class="ms-2">{{ humanize(selectedReviewInfo.created_at) }}</span>
+            <span v-else class="ms-2">{{ humanize(selectedReviewInfo.updated_at) }}</span>
+          </p>
+          <hr>
+          <p class="text-start" style="margin: 3rem 10rem 0 10rem; padding-bottom: 3rem;">{{ selectedReviewInfo.content}}</p>
+        </div>
+        <!-- comments -->
+        <!-- 댓글 생성 -->
+      </div>
+      <div style="background-color: rgba(255, 255, 255, 0.9); height: 65px; margin-top: 30px; padding: 10px; border-radius: 5px;">
+        <vs-input icon="mode_edit" class="comment-input input text-start ms-1" v-model="commentText" @keypress.enter="createComment"/>
+      </div>
+      <div>
+        <div v-for="(comment, idx) in comments" :key="idx" class="comment-container" style="background-color: rgba(255, 255, 255, 0.9); transition: 0.3s">
+          <div class="d-flex align-items-center">
+            <span class="material-icons" style="transform:rotate(180deg); margin-top: 0.5rem; margin-left: 0.5rem;">reply</span>
+            <img :src="SERVER_URL + comment.user.image">
+            <p class="text-start"><span class="fw-bold me-2">{{ comment.user.nickname }}</span>|<span v-if="humanize(comment.created_at) === humanize(comment.updated_at)" class="ms-2">{{ humanize(comment.created_at) }}</span>
+              <span v-else class="ms-2">{{ humanize(selectedReviewInfo.updated_at) }}</span>
+            </p>
+            <vs-dropdown :color="colorx" style="margin-left: 50rem;">
+              <a class="a-icon text-dark" style="opacity: 0.8;" href="#">
+                <span class="material-icons">more_vert</span>
+              </a>
+              <vs-dropdown-menu>
+                <vs-dropdown-item>
+                  <div style="d-flex align-items-baseline">
+                    <span class="material-icons me-1" style="position: relative; top: 5px;">edit</span>
+                    <button v-if="idx!==currentCommentIdx" @click="getComment(comment.content, idx)">수정</button>
+                  </div>
+                </vs-dropdown-item>
+                <vs-dropdown-item>
+                  <span class="material-icons me-1" style="position: relative; top: 5px;">delete</span>
+                  <button @click="deleteComment(comment.id)">삭제</button>
+                </vs-dropdown-item>
+              </vs-dropdown-menu>
+            </vs-dropdown>
+          </div>
+          <div>
+            <p class="text-start" style="word-break: break-all; padding-left: 5.16rem; padding-top: 0rem; padding-right: 5.16rem;">{{ comment.content }}</p>
+          </div>
+          <div>
+            <!-- 댓글 수정 -->
+            <!-- 현재 수정 버튼의 인덱스의 글에서 수정창 등장 -->
+            <vs-input v-if="idx===currentCommentIdx" icon="mode_edit"
+              ref="commentUpdateInput" class="inputx text-start" style="margin-start: 8px; margin-bottom: 8px; width: 1100px; margin-end: 10px;"
+              v-model="currentCommentText" @keypress.enter="updateComment($event, comment.id)" @blur="currentCommentIdx = ''"/>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -64,6 +117,7 @@
 import axios from 'axios'
 import SERVER from '@/api/drf.js'
 import { mapState } from 'vuex'
+import swal from 'sweetalert'
 
 export default {
   name: 'Comment',
@@ -78,6 +132,8 @@ export default {
       selectedReviewInfo: {},
       commentText: '',
       comments: [],
+      currentCommentText: '',
+      currentCommentIdx: '',
       windowWidth: parseInt(screen.availWidth)+"px",
       isPhototicket: false,
       tooltip: '',
@@ -160,10 +216,88 @@ export default {
     },
     humanize: function (date) {
       const moment = require('moment')
-      const created = moment(date).format('YYYY-MM-DD')
+      const created = moment(date).format('YYYY.MM.DD\u00A0\u00A0HH:MM')
       return created
-    }
-  },
+    },
+    // 댓글 조회 - 상민 수정 상민 수정 상민 수정 상민 수정 상민 수정
+    getComments: function () {
+      axios({
+        method: 'get',
+        url: `http://127.0.0.1:8000/api/v1/reviews/${this.$route.query.review}/comments/`,
+        headers: this.$store.getters.config,
+      })
+      .then((res)=>{
+        this.comments = res.data
+      })
+    },
+    // 댓글 생성
+    createComment: function () {
+      const content = this.commentText
+      axios({
+        method: 'post',
+        url: `${SERVER.URL}/api/v1/reviews/${this.selectedReviewInfo.id}/comments/`,
+        headers: this.$store.getters.config,
+        data: {
+          content,
+        }
+      })
+      .then(res => {
+        console.log(res.data)
+        console.log(this.comments)
+        this.comments.unshift(res.data)
+        this.commentText = ''
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    },
+    // 단일 댓글 조회 (댓글 수정 사전 작업)
+    // idx : 수정 버튼의 인덱스
+    getComment: function (commentContent, idx) {
+      this.currentCommentText = commentContent
+      this.currentCommentIdx = idx
+    },
+    // 댓글 수정
+    updateComment: function ($event, commentPk) {
+      // 새로 입력된 댓글
+      const newComment = $event.target.value
+      axios({
+        method: 'put',
+        url: `${SERVER.URL}/api/v1/comments/${commentPk}/`,
+        headers: this.$store.getters.config,
+        data: {
+          'content': newComment
+        }
+      })
+      // 댓글 갱신
+      .then(() => {
+        this.getComments()
+        this.currentCommentIdx = ''
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+    },
+    // 댓글 제거
+    deleteComment: function (commentPk) {
+      console.log(commentPk)
+      axios({
+        method: 'delete',
+        url: `${SERVER.URL}/api/v1/comments/${commentPk}`,
+        headers: this.$store.getters.config,
+      })
+      // db에서 삭제 후 vue에서 삭제
+      .then((res) => {
+        console.log(res)
+        this.getComments()
+      })
+      .catch(err => {
+        console.log(err)
+        swal ("자신의 댓글만 지워주세요!", {
+          dangerMode: true,
+        })
+      })
+  }},
   // main page에서 카드를 눌렀을 때 detail page로 이동된 것
   // detail page가 실행되자마자 영화정보, 영화에 대한 리뷰, 유저가 준 rating, 
   // django와 통신은 잘됨
@@ -253,7 +387,7 @@ export default {
     .catch(err => {
       console.log(err)
     }),
-    this.getReviews()
+    this.getComments()
     document.addEventListener('scroll', this.checkBottom)
   },
   computed: {
@@ -293,5 +427,38 @@ export default {
   top: 35rem;
   left: 23.5rem;
   width: 70rem;
+}
+.review-container img {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  width: 60px;
+  margin-right: 20px;
+  border-radius: 50%;
+}
+.comment-input {
+  width: 90% !important;
+  display: inline !important;
+  top: -1.3rem;
+}
+.comment-container {
+  border: 2px solid #dedede;
+  background-color: #f1f1f1;
+  border-radius: 5px;
+  margin: 10px 0;
+}
+.comment-container img {
+  top: 1.5rem;
+  left: 1.5rem;
+  width: 45px;
+  border-radius: 50%;
+  margin-left: 0.3rem;
+  margin-top: 0.5rem;
+}
+.comment-container p {
+  opacity: 0.8;
+  padding-top: 1.5rem;
+  margin-left: 0.7rem;
+  font-size: 15px;
 }
 </style>
