@@ -27,13 +27,14 @@
         <el-rate
           v-model="currentRate"
           :colors="colors"
-          @change="giveRate">
+          @change="giveRate"
+          >
         </el-rate>
         <el-tooltip :content="tooltip" placement="right">
           <v-btn v-if="!isPhototicket" icon id="add-photo-ticket-icon" @click="addMyPhototicket" @mousedown="$vs.notify({title:'포토티켓 추가!',text:'이제 내 프로필에서 언제든 확인할 수 있어요', color:'danger', icon:'favorite'})" class="ms-2">
             <v-icon>mdi-heart</v-icon>
           </v-btn>
-          <v-btn v-else icon id="remove-photo-ticket-icon" @click="removeMyPhototicket" @mousedown="$vs.notify({title:'포토티켓 삭제...',text:'다시 한 번 눌러주실거죠? 😥', color:'warning', icon:'delete'})" class="ms-2">
+          <v-btn v-else icon id="remove-photo-ticket-icon" @click="removeMyPhototicket" @mousedown="$vs.notify({title:'포토티켓 삭제...',text:'다시 한 번 눌러주실거죠? 😥', color:'dark', icon:'delete'})" class="ms-2">
             <v-icon>mdi-heart</v-icon>
           </v-btn>
         </el-tooltip>
@@ -58,7 +59,7 @@
         <vs-input icon="mode_edit" class="inputx review-input text-start" v-model="reviewText" @keypress.enter="createReview"/>
       </div>
       <vs-collapse accordion class="p-0">
-        <div v-for="(review, idx) in reviews" :key="idx" class="chat-container d-flex align-items-center" style="background-color: rgba(255, 255, 255, 0.9);"  @click="setComment(review)">
+        <div v-for="(review, idx) in reviews" :key="idx" class="chat-container d-flex align-items-center" style="background-color: rgba(255, 255, 255, 0.9); transition: 0.3s"  @click="setComment(review)">
           <vs-collapse-item icon-arrow="false" class="w-100">
             <div slot="header">
               <img :src="SERVER_URL+review.user.image" alt="Avatar" style="width:100%; margin-left: 10px;">
@@ -135,7 +136,6 @@ export default {
         },
       })
       .then((res)=>{
-        console.log(res.data)
         this.possiblePageNum = res.data.pop()['possible_page']
         this.reviews.push(...res.data)
         this.pageNum += 1
@@ -170,6 +170,7 @@ export default {
     },
     // 리뷰 제거
     deleteReview: function (reviewPk, idx) {
+      console.log(reviewPk)
       axios({
         method: 'delete',
         url: `${SERVER.URL}/api/v1/reviews/${reviewPk}`,
@@ -221,6 +222,7 @@ export default {
     // 별점 주기
     giveRate: function () {
       const rate = this.currentRate
+      this.$vs.notify({title:'평점 후원!',text: `${this.nickname}님! ${this.currentRate}점 후원 감사합니다! 😘`,color:'warning',icon:'star'})
       // 별점을 이미 줬으면 put
       if (this.originalRate) {
         axios({
@@ -228,7 +230,7 @@ export default {
           url: `${SERVER.URL}/api/v1/movies/${this.selectedMovie}/rates/`,
           headers: this.$store.getters.config,
           data: {
-            rate
+            rate: rate*20,
           }
         })
         .then(res => {
@@ -244,7 +246,7 @@ export default {
           url: `${SERVER.URL}/api/v1/movies/${this.selectedMovie}/rates/`,
           headers: this.$store.getters.config,
           data: {
-            rate
+            rate: rate*20,
           }
         })
         .then(res => {
@@ -289,7 +291,6 @@ export default {
     humanize: function (date) {
       const moment = require('moment')
       const created = moment(date).format('YYYY-MM-DD')
-      console.log(created)
       return created
     }
   },

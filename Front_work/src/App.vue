@@ -33,7 +33,7 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  // font-family: 'Noto Sans KR', sans-serif;
+  // font-family: 'NanumSquare', sans-serif;
 }
 body {
   margin: 0;

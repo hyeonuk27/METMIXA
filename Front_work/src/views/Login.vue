@@ -3,11 +3,11 @@
     <div id="bg" class="carousel slide" :style="{ width: windowWidth }" data-bs-ride="carousel">
       <div class="carousel-inner">
         <div class="carousel-item active" data-bs-interval="4000">
-          <img src="https://www.themoviedb.org/t/p/w1066_and_h600_bestv2/2nbKZ5RWFSvjq5IGVRcz8kAolmw.jpg
+          <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbwBmBj%2FbtqzlkqsFRT%2FDdWgcmONokKV2w3e5JGnZ0%2Fimg.jpg
 " class="d-block w-100" alt="...">
         </div>
         <div class="carousel-item" data-bs-interval="4000">
-          <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbwBmBj%2FbtqzlkqsFRT%2FDdWgcmONokKV2w3e5JGnZ0%2Fimg.jpg
+          <img src="https://www.themoviedb.org/t/p/w1066_and_h600_bestv2/2nbKZ5RWFSvjq5IGVRcz8kAolmw.jpg
 " class="d-block w-100" alt="...">
         </div>
         <div class="carousel-item" data-bs-interval="4000">
