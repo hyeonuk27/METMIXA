@@ -52,35 +52,6 @@
         <h6 class="col-4">{{ actors[1] }}</h6>
       </div>
     </div>
-    <div id="review">
-      <!-- 리뷰 작성 -->
-      <div class="chat-container" style="background-color: rgba(255, 255, 255, 0.9); height: 65px; padding: 10px;">
-        <vs-input icon="mode_edit" class="inputx review-input text-start" v-model="reviewText" @keypress.enter="createReview"/>
-      </div>
-      <vs-collapse accordion class="p-0">
-        <div v-for="(review, idx) in reviews" :key="idx" class="chat-container d-flex align-items-center" style="background-color: rgba(255, 255, 255, 0.9); transition: 0.3s"  @click="setComment(review)">
-          <vs-collapse-item class="w-100">
-            <div slot="header" class="d-flex justify-content-start align-items-center">
-              <img :src="SERVER_URL+review.user.image" alt="Avatar" style="width:100%; margin-left: 10px;">
-              <!-- 너무 긴 코멘트가 적힐 경우 짤리지 않도록 처리해줘야한다 -->
-              <p class="m-0 text-truncate text-start fw-bold" style="font-size: 17px;">{{ review.content }}</p>
-            </div>
-
-            <!-- 댓글들 -->
-            <div class="d-flex justify-content-between align-items-end">
-              <p class="text-start" style="word-break: break-all; margin-left: 10rem;">{{ review.content }}
-                <br><br>
-                <el-badge :value="review.comments_count" class="item" style="width: 1.2rem; height: 0rem; font-size: 20px;">
-                  <i class="fas fa-comment" @mousedown="$router.push({ name: 'Comment', query: { movie: selectedMovie, review: review.id } })"></i>
-                </el-badge>
-              </p>
-              <span v-if="humanize(review.created_at) === humanize(review.updated_at)" style="margin-right: 1.5rem;">작성: {{ humanize(review.created_at) }}</span>
-              <span v-else style="margin-right: 1.5rem;">수정: {{ humanize(review.updated_at) }}</span>
-            </div>
-          </vs-collapse-item>
-        </div>
-      </vs-collapse>
-    </div>
   </div>
 </template>
 
@@ -88,21 +59,17 @@
 import axios from 'axios'
 import SERVER from '@/api/drf.js'
 import { mapState } from 'vuex'
-import swal from 'sweetalert'
 
 export default {
-  name: 'Detail',
+  name: 'Comment',
   data: function () {
     return {
-      //  별점 주기
       originalRate: '',
       currentRate: 1,
       colors: ['#99A9BF', '#F7BA2A', '#FF9900'],
-      reviewText: '',
-      commentText: '',
       selectedMovie: '',
       selectedMovieInfo: {},
-      reviews: [],
+      commentText: '',
       comments: [],
       windowWidth: parseInt(screen.availWidth)+"px",
       isPhototicket: false,
@@ -115,100 +82,6 @@ export default {
     }
   },
   methods: {
-    // 리뷰 조회(인피니트 스크롤)
-    getReviews: function () {
-      axios({
-        method: 'get',
-        url: `http://127.0.0.1:8000/api/v1/movies/${this.selectedMovie}/reviews/`,
-        headers: this.$store.getters.config,
-        params: {
-          page_num: this.pageNum,
-        },
-      })
-      .then((res)=>{
-        this.possiblePageNum = res.data.pop()['possible_page']
-        this.reviews.push(...res.data)
-        this.pageNum += 1
-      })
-    },
-    checkBottom: function () {
-      const {scrollTop, clientHeight, scrollHeight} = document.documentElement
-      if (scrollHeight - scrollTop <= clientHeight) {
-        if (this.pageNum <= this.possiblePageNum) {
-          this.getReviews()
-        }
-      }
-    },
-    // 리뷰 생성
-    createReview: function () {
-      const content = this.reviewText
-      axios({
-        method: 'post',
-        url: `${SERVER.URL}/api/v1/movies/${this.selectedMovie}/reviews/`,
-        headers: this.$store.getters.config,
-        data: {
-          content,
-        }
-      })
-      .then(res => {
-        this.reviews.unshift(res.data)
-        this.reviewText = ''
-      })
-      .catch(err => {
-        console.log(err)
-      })
-    },
-    // 리뷰 제거
-    deleteReview: function (reviewPk, idx) {
-      console.log(reviewPk)
-      axios({
-        method: 'delete',
-        url: `${SERVER.URL}/api/v1/reviews/${reviewPk}`,
-        headers: this.$store.getters.config,
-      })
-      // db에서 삭제 후 vue에서 삭제
-      .then(() => {
-        this.reviews.splice(idx, 1)
-      })
-      .catch(err => {
-        console.log(err)
-        swal ("자신의 리뷰만 지워주세요!", {
-          dangerMode: true,
-        })
-      })
-    },
-    // 댓글 세팅
-    setComment: function (review) {
-      // 댓글창이 v-model로 모두 공유하기 때문데 다른 리뷰를 클릭할 때마다 초기화
-      this.commentText = ''
-      axios({
-        method: 'get',
-        url: `http://127.0.0.1:8000/api/v1/reviews/${review.id}/comments/`,
-        headers: this.$store.getters.config,
-      })
-      .then((res)=>{
-        this.comments = res.data
-      })
-    },
-    // 댓글 생성
-    createComment: function (reviewPk) {
-      axios({
-        method: 'post',
-        url: `${SERVER.URL}/api/v1/reviews/${reviewPk}/comments/`,
-        headers: this.$store.getters.config,
-        data: {
-          content: this.commentText,
-        }
-      })
-      .then((res) => {
-        this.comments.unshift(res.data)
-        this.commentText = ''
-      })
-      .catch(err => {
-        console.log(err)
-      })
-    },
-    // 별점 주기
     giveRate: function () {
       const rate = this.currentRate
       this.$vs.notify({title:'평점 후원!',text: `${this.nickname}님! ${this.currentRate}점 후원 감사합니다! 😘`,color:'warning',icon:'star'})
@@ -287,8 +160,7 @@ export default {
   // detail page가 실행되자마자 영화정보, 영화에 대한 리뷰, 유저가 준 rating, 
   // django와 통신은 잘됨
   created() {
-    // console.log(this.$store.state.authToken)
-    const moviePk = this.$route.query.moviePk
+    const moviePk = this.$route.query.movie
     this.selectedMovie = moviePk
     // 영화정보
     axios({
@@ -363,15 +235,15 @@ export default {
     document.addEventListener('scroll', this.checkBottom)
   },
   computed: {
-      vote_average: function () {
-        const result = ((this.selectedMovieInfo.tmdb_vote_sum + this.selectedMovieInfo.our_vote_sum*2) / (this.selectedMovieInfo.tmdb_vote_cnt + this.selectedMovieInfo.our_vote_cnt)).toFixed(1)
-        return result*10
-      },
-      ...mapState([
-        'nickname',
-        'image',
-      ])
-    }
+    vote_average: function () {
+      const result = ((this.selectedMovieInfo.tmdb_vote_sum + this.selectedMovieInfo.our_vote_sum*2) / (this.selectedMovieInfo.tmdb_vote_cnt + this.selectedMovieInfo.our_vote_cnt)).toFixed(1)
+      return result*10
+    },
+    ...mapState([
+      'nickname',
+      'image',
+    ])
+  }
 }
 </script>
 
@@ -394,92 +266,4 @@ export default {
   left: 0; 
   margin: auto;
 }
-#poster {
-  position: absolute;
-  top: 5rem;
-  left: 23.5rem; 
-}
-#movie-title{
-  width: 50rem;
-}
-#movie-overview{
-  width: 50rem;
-  height: 5rem;
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.2; 
-  height: 3.6em;
-  word-wrap: break-word;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-}
-#info-div{
-  position: absolute; 
-  top: 10rem;
-  left: 43.5rem;;
-}
-#percentage{
-  position: absolute; 
-  top: 5.6rem;
-  left: 3.5rem;
-  color: white;
-}
-#add-photo-ticket-icon {
-  color: white;
-  background-color: rgb(12, 37, 63);
-}
-#remove-photo-ticket-icon {
-  color: crimson;
-  background-color: rgb(12, 37, 63);
-}
-#review{
-  position: absolute;
-  top: 35rem;
-  left: 23.5rem;
-  width: 70rem;
-}
-
-#Detail {
-  background-color: #1414144b;
-}
-.chat-container {
-  border: 2px solid #dedede;
-  background-color: #f1f1f1;
-  border-radius: 5px;
-  margin: 10px 0;
-}
-.chat-container p {
-  width: 50%;
-  display: inline-block;
-}
-.chat-container::after {
-  content: "";
-  clear: both;
-  display: table;
-}
-.chat-container img {
-  float: left;
-  max-width: 60px;
-  width: 100%;
-  margin-right: 20px;
-  border-radius: 50%;
-}
-.chat-container img.right {
-  float: right;
-  margin-left: 20px;
-  margin-right:0;
-}
-.review-input {
-  width: 90% !important;
-  display: inline !important;
-  margin-left: 0rem;
-}  
-</style>
-
-<style lang="stylus">
-.default-input
-  .inputx
-    margin 10px
 </style>

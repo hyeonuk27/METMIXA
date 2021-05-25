@@ -5,6 +5,7 @@ import Signup from '@/views/Signup.vue'
 import Login from '@/views/Login.vue'
 import Main from '@/views/Main.vue'
 import Detail from '@/views/Detail.vue'
+import ReviewComment from '@/views/ReviewComment.vue'
 
 
 Vue.use(VueRouter)
@@ -19,6 +20,11 @@ const routes = [
     path: '/detail',
     name: 'Detail',
     component: Detail,
+  },
+  {
+    path: '/comment',
+    name: 'Comment',
+    component: ReviewComment,
   },
   {
     path: '/profile',

@@ -19,7 +19,6 @@ from django.core.paginator import Paginator
 from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from rest_framework.renderers import JSONRenderer
 
 
 User = get_user_model()
@@ -128,13 +127,16 @@ def review_list(request, movie_pk):
 
 
 # 리뷰 삭제, 수정
-@api_view(['PUT', 'DELETE'])
+@api_view(['GET', 'PUT', 'DELETE'])
 @authentication_classes([JSONWebTokenAuthentication])
 @permission_classes([IsAuthenticated])
 def review_detail(request, review_pk):
     review = get_object_or_404(Review, pk=review_pk)
     # request.user와 review.user와 같지 않으면 수정 삭제 불가
-    if request.user == review.user:
+    if request.method == 'GET':
+        serializer = ReviewSerializer(review)
+        return Response(serializer.data)
+    elif request.user == review.user:
         # 리뷰 제거
         if request.method == 'DELETE':
             review.delete()
