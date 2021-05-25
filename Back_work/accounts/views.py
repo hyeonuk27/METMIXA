@@ -8,6 +8,11 @@ from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
+
 
 @api_view(['POST'])
 def signup(request):
@@ -16,6 +21,9 @@ def signup(request):
 
     if password != password_confirmation:
         return Response({'error': '비밀번호가 일치하지 않습니다.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if User.objects.filter(nickname=request.data.get('nickname')).exists():
+        return Response({'error': '일치하는 닉네임이 존재합니다.'}, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
@@ -35,6 +43,8 @@ def profile(request):
         return Response(serializer.data)
     elif request.method == 'PUT':
         image = request.data.get('image')
+        if User.objects.filter(nickname=request.data.get('nickname')).exists():
+            return Response({'error': '일치하는 닉네임이 존재합니다.'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = UserProfileSerializer(request.user, data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save(image=image)

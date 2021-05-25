@@ -1,8 +1,9 @@
 from re import L
 from django.shortcuts import get_list_or_404, get_object_or_404
 from .models import Genre, Movie, Review, Comment, Director, Actor, PhotoTicket, Rate, RecommendAlgoScore
-from .serializers import MovieListSerializer, MovieSerializer, ReviewSerializer, CommentSerializer, PhotoTicketSerializer, RateSerializer, RecommendAlgoScoreSerializer, DirectorSerializer, ActorSerializer
+from .serializers import MovieListSerializer, MovieSerializer, ReviewListSerializer, ReviewSerializer, CommentSerializer, PhotoTicketSerializer, RateSerializer, RecommendAlgoScoreSerializer, DirectorSerializer, ActorSerializer
 from django.db.models import F, Q
+from django.contrib.auth import get_user_model
 
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -19,6 +20,9 @@ from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.renderers import JSONRenderer
+
+
+User = get_user_model()
 
 # 메인 페이지
 # 영화 추천 / 조회 리스트 정보
@@ -112,12 +116,12 @@ def review_list(request, movie_pk):
         paginator = Paginator(reviews, 5)
         page_number = request.GET.get('page_num')
         reviews = paginator.get_page(page_number)
-        serializer = ReviewSerializer(reviews, many=True)
+        serializer = ReviewListSerializer(reviews, many=True)
         data = serializer.data
         data.append({'possible_page': paginator.num_pages})
         return Response(data)
     elif request.method == 'POST':
-        serializer = ReviewSerializer(data=request.data)
+        serializer = ReviewListSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save(user=request.user, movie=movie)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -154,7 +158,7 @@ def review_detail(request, review_pk):
 def comment_list(request, review_pk):
     review = get_object_or_404(Review, pk=review_pk)
     if request.method == 'GET':
-        comments = Comment.objects.filter(review__pk=review_pk)
+        comments = Comment.objects.filter(review__pk=review_pk).order_by('-pk')
         serializer = CommentSerializer(comments, many=True)
         return Response(serializer.data)
     elif request.method == 'POST':

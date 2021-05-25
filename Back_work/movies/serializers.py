@@ -1,21 +1,35 @@
 from rest_framework import serializers
 from .models import Director, Actor, Movie, Review, Genre, Comment, PhotoTicket, Rate, RecommendAlgoScore
+# 실험
+from accounts.serializers import UserProfileSerializer
 
 
 class CommentSerializer(serializers.ModelSerializer):
-
+    user = UserProfileSerializer(read_only=True)
     class Meta:
         model = Comment
         fields = ('id', 'user', 'review', 'content', 'created_at', 'updated_at',)
-        read_only_fields = ('user', 'review',)
+        read_only_fields = ('review',)
+
+
+class ReviewListSerializer(serializers.ModelSerializer):
+    comments = CommentSerializer(many=True, read_only=True)
+    comments_count = serializers.IntegerField(source='comments.count', read_only=True)
+    # 실험
+    user = UserProfileSerializer(read_only=True)
+    class Meta:
+        model = Review
+        fields = ('id', 'user', 'movie', 'content', 'created_at', 'updated_at', 'comments', 'comments_count')
+        read_only_fields = ('movie',)
 
 
 class ReviewSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
     comments_count = serializers.IntegerField(source='comments.count', read_only=True)
+
     class Meta:
         model = Review
-        fields = ('id', 'user', 'movie', 'content', 'created_at', 'updated_at', 'comments', 'comments_count',)
+        fields = ('id', 'user', 'movie', 'content', 'created_at', 'updated_at', 'comments', 'comments_count')
         read_only_fields = ('user', 'movie',)
 
 

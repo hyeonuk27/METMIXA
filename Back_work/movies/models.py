@@ -33,6 +33,8 @@ class Movie(models.Model): # 총 13개 필드
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='reviews')
+    nickname = models.CharField(max_length=50)
+    image_url = models.TextField()
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
