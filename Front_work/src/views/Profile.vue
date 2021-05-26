@@ -81,7 +81,10 @@ export default {
   created: function () {
     this.getMovies()
     document.addEventListener('scroll', this.checkBottom)
-  }
+  },
+  destroyed: function () {
+    document.removeEventListener('scroll', this.checkBottom)
+  },
 }
 </script>
 

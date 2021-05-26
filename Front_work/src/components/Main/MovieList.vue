@@ -55,7 +55,7 @@ export default {
     ]),
     play(event) {
       var audio = new Audio(require('/src/assets/moviesound.mp3'));
-      if (Math.abs(this.afterSlide - event) > 0 && Math.abs(this.afterSlide - event) < 4){
+      if (((Math.abs(this.afterSlide - event) > 0 && Math.abs(this.afterSlide - event) < 4)) || (this.movieList.length - (Math.abs(this.afterSlide - event)) < 2)) {
         audio.play()
         .catch(err => {
           console.log(err)

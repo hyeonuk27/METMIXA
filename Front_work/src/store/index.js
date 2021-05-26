@@ -28,7 +28,7 @@ export default new Vuex.Store({
       }
     },
     videoURI: function (state) {
-      return `https://www.youtube.com/embed/${state.videoKey}?controls=0&rel=0&autoplay=1&mute=1&loop=1&playlist=${state.videoKey}`
+      return `https://www.youtube.com/embed/${state.videoKey}?controls=1&rel=0&autoplay=1&mute=1&loop=1&playlist=${state.videoKey}`
     },
   },
   mutations: {

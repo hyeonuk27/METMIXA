@@ -1,7 +1,7 @@
 from re import L
 from django.shortcuts import get_list_or_404, get_object_or_404
 from .models import Genre, Movie, Review, Comment, Director, Actor, PhotoTicket, Rate, RecommendAlgoScore
-from .serializers import MovieListSerializer, MovieSerializer, ReviewListSerializer, ReviewSerializer, CommentSerializer, PhotoTicketSerializer, RateSerializer, RecommendAlgoScoreSerializer, DirectorSerializer, ActorSerializer
+from .serializers import MovieListSerializer, MovieSerializer, ReviewSerializer, CommentSerializer, PhotoTicketSerializer, RateSerializer, RecommendAlgoScoreSerializer, DirectorSerializer, ActorSerializer
 from django.db.models import F, Q
 from django.contrib.auth import get_user_model
 
@@ -115,12 +115,12 @@ def review_list(request, movie_pk):
         paginator = Paginator(reviews, 5)
         page_number = request.GET.get('page_num')
         reviews = paginator.get_page(page_number)
-        serializer = ReviewListSerializer(reviews, many=True)
+        serializer = ReviewSerializer(reviews, many=True)
         data = serializer.data
         data.append({'possible_page': paginator.num_pages})
         return Response(data)
     elif request.method == 'POST':
-        serializer = ReviewListSerializer(data=request.data)
+        serializer = ReviewSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save(user=request.user, movie=movie)
             return Response(serializer.data, status=status.HTTP_201_CREATED)

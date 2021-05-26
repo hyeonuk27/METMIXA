@@ -12,7 +12,7 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only_fields = ('review',)
 
 
-class ReviewListSerializer(serializers.ModelSerializer):
+class ReviewSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
     comments_count = serializers.IntegerField(source='comments.count', read_only=True)
     # 실험
@@ -21,16 +21,6 @@ class ReviewListSerializer(serializers.ModelSerializer):
         model = Review
         fields = ('id', 'user', 'movie', 'content', 'created_at', 'updated_at', 'comments', 'comments_count')
         read_only_fields = ('movie',)
-
-
-class ReviewSerializer(serializers.ModelSerializer):
-    comments = CommentSerializer(many=True, read_only=True)
-    comments_count = serializers.IntegerField(source='comments.count', read_only=True)
-
-    class Meta:
-        model = Review
-        fields = ('id', 'user', 'movie', 'content', 'created_at', 'updated_at', 'comments', 'comments_count')
-        read_only_fields = ('user', 'movie',)
 
 
 class MovieListSerializer(serializers.ModelSerializer):

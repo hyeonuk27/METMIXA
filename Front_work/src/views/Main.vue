@@ -2,7 +2,7 @@
   <div id='Main'>
     <h1 id='logo'>METMIXA</h1>
     <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0;" @click="uncheck"></div>
-    <iframe width="854" height="480" :src="videoURI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <iframe width="1920" height="1080" :src="videoURI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     <input type="checkbox" id="my-menu">
     <label for="my-menu">
       <img v-if="image === SERVER_URL+'null'" src="@/assets/default_profile.jpg">
@@ -19,7 +19,7 @@
         <a href="http://127.0.0.1:8000/admin" class="text-decoration-none">관리자 페이지</a>
       </div>
     </div>
-    <MovieList :movieList="movieList" @click.native="uncheck"/>
+    <MovieList :movieList="movieList" @mousedown.native="uncheck"/>
   </div>
 </template>
 
@@ -62,22 +62,22 @@ export default {
   },
   created: function () {
     axios({
-        method: 'get',
-        // 장고한테 요청
-        url: 'http://127.0.0.1:8000/api/v1/movies/',
-        params: {
-          mode: 'algorithm',
-        },
-        headers: this.config
-      })
-      .then((res)=>{
-        // 응답 데이터에서 가능한 페이지 수 데이터만 pop해서 가져온다.
-        this.movieList = res.data
-        this.fetchVideos(this.movieList[0].tmdb_id)
-      })
-      .catch((err) => {
-        console.log(err)
-      })
+      method: 'get',
+      // 장고한테 요청
+      url: 'http://127.0.0.1:8000/api/v1/movies/',
+      params: {
+        mode: 'algorithm',
+      },
+      headers: this.config
+    })
+    .then((res)=>{
+      // 응답 데이터에서 가능한 페이지 수 데이터만 pop해서 가져온다.
+      this.movieList = res.data
+      this.fetchVideos(this.movieList[0].tmdb_id)
+    })
+    .catch((err) => {
+      console.log(err)
+    })
   }
 }
 </script>

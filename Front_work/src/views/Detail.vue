@@ -10,7 +10,7 @@
       <div class="d-flex justify-content-start mt-4 mb-4">
       <div class="d-inline-block">
         <span class="text-white me-2">평점</span>
-        <h5 id="percentage">{{ vote_average }}<span style="font-size: 6px;">%</span></h5>
+        <h5 v-if="vote_average" id="percentage">{{ vote_average }}<span style="font-size: 6px;">%</span></h5>
         <el-progress 
           type="circle"
           v-if="vote_average"
@@ -119,6 +119,8 @@ export default {
   methods: {
     // 리뷰 조회(인피니트 스크롤)
     getReviews: function () {
+      console.log('호출')
+      console.log(this.reviews)
       axios({
         method: 'get',
         url: `http://127.0.0.1:8000/api/v1/movies/${this.selectedMovie}/reviews/`,
@@ -129,14 +131,20 @@ export default {
       })
       .then((res)=>{
         this.possiblePageNum = res.data.pop()['possible_page']
-        this.reviews.push(...res.data)
+        if (this.pageNum === 1) {
+          this.reviews = res.data
+        } else {
+          this.reviews.push(...res.data)
+        }
         this.pageNum += 1
       })
     },
-    checkBottom: function () {
+    detailCheckBottom: function () {
       const {scrollTop, clientHeight, scrollHeight} = document.documentElement
       if (scrollHeight - scrollTop <= clientHeight) {
         if (this.pageNum <= this.possiblePageNum) {
+          console.log(this.name)
+          console.log('dd')
           this.getReviews()
         }
       }
@@ -331,7 +339,10 @@ export default {
       console.log(err)
     }),
     this.getReviews()
-    document.addEventListener('scroll', this.checkBottom)
+    document.addEventListener('scroll', this.detailCheckBottom)
+  },
+  destroyed: function () {
+    document.removeEventListener('scroll', this.detailCheckBottom)
   },
   computed: {
       vote_average: function () {

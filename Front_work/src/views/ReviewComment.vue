@@ -10,7 +10,7 @@
       <div class="d-flex justify-content-start mt-4 mb-4">
       <div class="d-inline-block">
         <span class="text-white me-2">평점</span>
-        <h5 id="percentage">{{ vote_average }}<span style="font-size: 6px;">%</span></h5>
+        <h5 v-if="vote_average" id="percentage">{{ vote_average }}<span style="font-size: 6px;">%</span></h5>
         <el-progress 
           type="circle"
           v-if="vote_average"
@@ -57,13 +57,38 @@
     <div id="comment" class="pb-5">
       <div style="width: 100%; background-color: rgb(231, 231, 230); border-radius: 5px;">
         <div class="review-container" style="width: 100%; background-color: rgb(231, 231, 230); border-radius: 5px;">
-          <img :src="image" alt="">
-          <p class="text-start" style="padding-top: 2.7rem; padding-left: 6rem; margin-bottom: 2.7rem; opacity: 0.8;"><span class="fw-bold me-2">{{ nickname }}</span> | 
-            <span v-if="humanize(review.created_at) === humanize(review.updated_at)" class="ms-2">{{ humanize(selectedReviewInfo.created_at) }}</span>
-            <span v-else class="ms-2">{{ humanize(selectedReviewInfo.updated_at) }}</span>
-          </p>
+          <div class="d-flex align-items-center">
+            <img :src="SERVER_URL+selectedReviewInfo.user.image" alt="">
+            <p class="text-start" style="padding-top: 2.7rem; padding-left: 6rem; padding-bottom: 1.4rem; margin-bottom: 0.2rem; opacity: 0.8;">
+              <span class="fw-bold me-2">{{ selectedReviewInfo.user.nickname }}</span> | 
+              <span v-if="humanize(review.created_at) === humanize(review.updated_at)" class="ms-2">{{ humanize(selectedReviewInfo.created_at) }}</span>
+              <span v-else class="ms-2">{{ humanize(selectedReviewInfo.updated_at) }}</span>
+            </p>
+            <vs-dropdown :vs-trigger-click="true" v-if="nickname === selectedReviewInfo.user.nickname" style="margin-left: 48.75rem; top: -0.7rem;">
+              <a class="a-icon text-dark" style="opacity: 1;" href="#">
+                <span class="material-icons">more_vert</span>
+              </a>
+              <vs-dropdown-menu>
+                <vs-dropdown-item>
+                  <div style="d-flex align-items-baseline">
+                    <span class="material-icons me-1" style="position: relative; top: 5px;">edit</span>
+                    <button @mousedown="currentReviewText=selectedReviewInfo.content" @click="isReviewUpdating=true">수정</button>
+                  </div>
+                </vs-dropdown-item>
+                <vs-dropdown-item>
+                  <span class="material-icons me-1" style="position: relative; top: 5px;">delete</span>
+                  <button @click="deleteReview(selectedReview)">삭제</button>
+                </vs-dropdown-item>
+              </vs-dropdown-menu>
+            </vs-dropdown>
+          </div>
           <hr>
-          <p class="text-start" style="margin: 3rem 10rem 0 10rem; padding-bottom: 3rem;">{{ selectedReviewInfo.content}}</p>
+          <!-- review 수정 input -->
+          <div v-if="isReviewUpdating" style="width:90%; margin-left: 3.5rem; padding: 2rem 0 2rem 0;">
+            <vs-input size="large" label-placeholder="리뷰 수정" class="inputx review-input text-start" style="margin: 2rem 10px 10px 10px; width: 1100px; word-break: break-all;"
+              v-model="currentReviewText"  @keypress.enter="updateReview(selectedReview)" @blur="isReviewUpdating = ''"/> 
+          </div>
+          <p v-if="!isReviewUpdating" class="text-start" style="margin: 3rem 10rem 0 10rem; padding-bottom: 3rem; word-break: break-all;">{{ selectedReviewInfo.content }}</p>
         </div>
         <!-- comments -->
         <!-- 댓글 생성 -->
@@ -79,7 +104,7 @@
             <p class="text-start"><span class="fw-bold me-2">{{ comment.user.nickname }}</span>|<span v-if="humanize(comment.created_at) === humanize(comment.updated_at)" class="ms-2">{{ humanize(comment.created_at) }}</span>
               <span v-else class="ms-2">{{ humanize(selectedReviewInfo.updated_at) }}</span>
             </p>
-            <vs-dropdown :color="colorx" style="margin-left: 50rem;">
+            <vs-dropdown :vs-trigger-click="true" v-if="nickname === comment.user.nickname" style="margin-left: 50rem;">
               <a class="a-icon text-dark" style="opacity: 0.8;" href="#">
                 <span class="material-icons">more_vert</span>
               </a>
@@ -87,7 +112,7 @@
                 <vs-dropdown-item>
                   <div style="d-flex align-items-baseline">
                     <span class="material-icons me-1" style="position: relative; top: 5px;">edit</span>
-                    <button v-if="idx!==currentCommentIdx" @click="getComment(comment.content, idx)">수정</button>
+                    <button @click="getComment(comment.content, idx)">수정</button>
                   </div>
                 </vs-dropdown-item>
                 <vs-dropdown-item>
@@ -130,6 +155,7 @@ export default {
       selectedMovieInfo: {},
       selectedReview: '',
       selectedReviewInfo: {},
+      currentReviewText: '',
       commentText: '',
       comments: [],
       currentCommentText: '',
@@ -143,6 +169,7 @@ export default {
       possiblePageNum: 2,
       SERVER_URL: SERVER.URL,
       review: {},
+      isReviewUpdating: false,
     }
   },
   methods: {
@@ -219,6 +246,49 @@ export default {
       const created = moment(date).format('YYYY.MM.DD\u00A0\u00A0HH:MM')
       return created
     },
+    updateReview: function (reviewPk) {
+      // 새로 입력된 리뷰
+      const newReview = this.selectedReviewInfo.content
+      console.log(this.selectedReviewInfo.content)
+      axios({
+        method: 'put',
+        url: `${SERVER.URL}/api/v1/reviews/${reviewPk}/`,
+        headers: this.$store.getters.config,
+        data: {
+          'content': newReview
+        }
+      })
+      // 리뷰 갱신
+      .then(() => {
+        this.isReviewUpdating = false
+        this.currentReviewText = ''
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+    },
+    // 리뷰 삭제 
+    deleteReview: function (reviewPk) {
+      axios({
+        method: 'delete',
+        url: `${SERVER.URL}/api/v1/reviews/${reviewPk}`,
+        headers: this.$store.getters.config,
+      })
+      // db에서 삭제 후 Detail page로 이동
+      .then(() => {
+        const moviePk = this.selectedMovie
+        this.$router.push({
+          name: 'Detail',
+          query: { moviePk }
+      })
+      })
+      .catch(err => {
+        console.log(err)
+        swal ("자신의 댓글만 지워주세요!", {
+          dangerMode: true,
+        })
+      })
+    },
     // 댓글 조회 - 상민 수정 상민 수정 상민 수정 상민 수정 상민 수정
     getComments: function () {
       axios({
@@ -242,8 +312,6 @@ export default {
         }
       })
       .then(res => {
-        console.log(res.data)
-        console.log(this.comments)
         this.comments.unshift(res.data)
         this.commentText = ''
       })
@@ -326,6 +394,7 @@ export default {
     })
     .then(res =>{
       this.selectedReviewInfo = res.data
+      this.currentReviewText = res.data.content
     })
     .catch(err => {
       console.log(err)
@@ -388,7 +457,6 @@ export default {
       console.log(err)
     }),
     this.getComments()
-    document.addEventListener('scroll', this.checkBottom)
   },
   computed: {
     vote_average: function () {

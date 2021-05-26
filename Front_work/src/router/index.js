@@ -63,6 +63,7 @@ router.beforeEach((to, from, next) => {
     'Main',
     'Profile',
     'Detail',
+    'Comment',
   ]
   // 1-2. 로그아웃이 필요한 컴포넌트
   const publicPages = [
@@ -89,7 +90,7 @@ router.beforeEach((to, from, next) => {
     next()
   }
 
-  if ((from.name === 'Main' && to.name === 'Login') || (from.name === 'Login' && to.name === 'Signup') || (from.name === 'Signup' && to.name === 'Login')) {
+  if ((from.name === 'Main' && to.name === 'Login') || (from.name === 'Login' && to.name === 'Signup') || (from.name === 'Signup' && to.name === 'Login') || (from.name === 'Comment' && to.name === 'Detail')) {
     next()
     window.location.reload()
   }
