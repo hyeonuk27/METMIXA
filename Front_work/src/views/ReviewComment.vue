@@ -245,7 +245,7 @@ export default {
     },
     humanize: function (date) {
       const moment = require('moment')
-      const created = moment(date).format('YYYY.MM.DD\u00A0\u00A0HH:MM')
+      const created = moment(date).format('YY.MM.DD\u00A0\u00A0HH:MM')
       return created
     },
     updateReview: function (reviewPk) {

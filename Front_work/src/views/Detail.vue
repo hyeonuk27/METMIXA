@@ -1,6 +1,7 @@
 <template>
   <div id='Detail'>
     <!-- 배경 -->
+    <h1 id='logo'>METMIXA</h1>
     <img id="bg-backdrop" :src="this.selectedMovieInfo.backdrop_path" alt="" :style="{ width: windowWidth }">
     <div id="bg-cover" :style="{ width: windowWidth }"></div>
     <img id="poster" :src="this.selectedMovieInfo.poster_path" rounded alt="" style="width: 300px; border-radius: 7px;">
@@ -73,10 +74,8 @@
             <div class="d-flex justify-content-between align-items-end">
               <p class="text-start" style="word-break: break-all; margin-left: 15rem;">{{ review.content }}
                 <br><br>
-                <span class="badge rounded-pill bg-danger" style="position: relative; top: 0.2rem; left: 1.8rem;">{{review.comments_count}}</span>
-                <el-badge :value="review.comments_count" class="item" style="width: 1.3rem; height: 0rem; font-size: 19px; position: relative;">
-                  <i class="fas fa-comment" @mousedown="$router.push({ name: 'Comment', query: { movie: selectedMovie, review: review.id } })"></i>
-                </el-badge>
+                <vs-avatar class="comment-button" :badge="review.comments_count" color="dark" icon="mode_comment" style="position: relative; top: 1.5rem; left: -0.2rem;" 
+                  @mousedown="$router.push({ name: 'Comment', query: { movie: selectedMovie, review: review.id } })"/>
               </p>
               <span v-if="humanize(review.created_at) === humanize(review.updated_at)" style="margin-right: 1.5rem;">작성: {{ humanize(review.created_at) }}</span>
               <span v-else style="margin-right: 1.5rem;">수정: {{ humanize(review.updated_at) }}</span>
@@ -260,7 +259,7 @@ export default {
     },
     humanize: function (date) {
       const moment = require('moment')
-      const created = moment(date).format('YYYY.MM.DD\u00A0\u00A0HH:MM')
+      const created = moment(date).format('YY.MM.DD\u00A0\u00A0HH:MM')
       return created
     }
   },
@@ -371,6 +370,7 @@ export default {
   opacity: 0.9;
   background-color: black;
 }
+
 #bg-backdrop {
   position: fixed; 
   z-index: -2;
@@ -378,14 +378,26 @@ export default {
   left: 0; 
   margin: auto;
 }
+
+#logo {
+  position: fixed;
+  top: 1rem;
+  left: 0.75rem;
+  color: #f1f1f1;
+  opacity: 0.7;
+  font-size: 3.2rem;
+}
+
 #poster {
   position: absolute;
   top: 5rem;
   left: 23.5rem; 
 }
+
 #movie-title{
   width: 50rem;
 }
+
 #movie-overview{
   width: 50rem;
   height: 5rem;
@@ -399,49 +411,59 @@ export default {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }
+
 #info-div{
   position: absolute; 
   top: 10rem;
   left: 43.5rem;;
 }
+
 #percentage{
   position: absolute; 
   top: 5.6rem;
   left: 3.5rem;
   color: white;
 }
+
 #add-photo-ticket-icon {
   color: white;
   background-color: rgb(12, 37, 63);
 }
+
 #remove-photo-ticket-icon {
   color: crimson;
   background-color: rgb(12, 37, 63);
 }
+
 #review{
   position: absolute;
   top: 35rem;
   left: 23.5rem;
   width: 70rem;
 }
+
 #Detail {
   background-color: #1414144b;
 }
+
 .chat-container {
   border: 2px solid #dedede;
   background-color: #f1f1f1;
   border-radius: 5px;
   margin: 10px 0;
 }
+
 .chat-container p {
   width: 55%;
   display: inline-block;
 }
+
 .chat-container::after {
   content: "";
   clear: both;
   display: table;
 }
+
 .chat-container img {
   float: left;
   max-width: 60px;
@@ -449,16 +471,35 @@ export default {
   margin-right: 10px;
   border-radius: 50%;
 }
+
 .chat-container img.right {
   float: right;
   margin-left: 20px;
   margin-right:0;
 }
+
 .review-input {
   width: 90% !important;
   display: inline !important;
   margin-left: 0rem;
-}  
+}
+
+.comment-button:hover {
+  transform-origin: top;
+  animation: bell 2s infinite linear;
+}
+
+@keyframes bell{
+  0%, 50%{
+    transform: rotate(0deg);
+	}
+  5%, 15%, 25%, 35%, 45% {
+    transform: rotate(13deg);
+  }
+  10%, 20%, 30%, 40% {
+    transform: rotate(-13deg);
+  }
+}
 </style>
 
 <style lang="stylus">

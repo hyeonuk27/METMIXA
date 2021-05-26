@@ -12,6 +12,19 @@
     <vs-input v-if="inputMode" autofocus class="select-input" color="rgba(255, 255, 255, 0.5)" v-model="selectInputValue" 
       @focus="inputFocus = true" @blur="inputFocus=false" @keypress.enter="searchInputSubmit($event)"/>
     <span v-if="!inputFocus && inputMode && !selectInputValue" class="input-icon material-icons">search</span>
+    <div v-if="genreMode" class="genre-cover"></div>
+    <div v-if="genreMode" class="genre-images">
+      <div class="row row-cols-1 row-cols-md-2 g-4" style="width: 70%;">
+        <div class="genre-image col" v-for="(image, index) in genreImages" :key="index">
+          <div class="card">
+            <img :src="SERVER_URL+image" class="card-img-top" alt="genre-img" @click="genreSubmit(index)">
+          </div>
+        </div>
+      </div>
+    </div>
+    <span v-if="selectedMode === 'genre'" class="dif-genre" @click="genreMode = true">
+      <span class="material-icons" style="position: relative; top: 5px; margin-right: 4px;">theaters</span>다른 장르
+    </span>
     <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0;" @click="uncheck"></div>
     <iframe width="1920" height="1080" :src="videoURI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     <input type="checkbox" id="my-menu">
@@ -20,13 +33,13 @@
       <img v-else :src="image">
     </label>
     <div class="sidebar">
-      <div id="menu1" class="menu mb-3 text-end fw-bold" @click="$router.push({ name: 'Profile' })">
+      <div id="menu1" class="menu mb-3 text-end" @click="$router.push({ name: 'Profile' })">
         <span>내 프로필</span>
       </div>
-      <div class="menu text-end fw-bold mb-3" @click="logout">
+      <div class="menu text-end mb-3" @click="logout">
         <span>로그아웃</span>
       </div>
-      <div v-if="nickname === '어드민'" class="menu text-end fw-bold">
+      <div v-if="nickname === '어드민'" class="menu text-end">
         <a href="http://127.0.0.1:8000/admin" class="text-decoration-none">관리자 페이지</a>
       </div>
     </div>
@@ -65,26 +78,32 @@ export default {
       inputMode: false,
       inputFocus: false,
       genreImages:[
-        '@/assets/genres/가족.jpg',
-        '@/assets/genres/공포.jpg',
-        '@/assets/genres/다큐.jpg',
-        '@/assets/genres/드라마.jpg',
-        '@/assets/genres/로맨스.jpg',
-        '@/assets/genres/모험.jpg',
-        '@/assets/genres/미스터리.jpg',
-        '@/assets/genres/범죄.jpg',
-        '@/assets/genres/서부.jpg',
-        '@/assets/genres/스릴러.jpg',
-        '@/assets/genres/애니메이션.jpg',
-        '@/assets/genres/액션.jpg',
-        '@/assets/genres/역사.jpg',
-        '@/assets/genres/음악.jpg',
-        '@/assets/genres/전쟁.jpg',
-        '@/assets/genres/코미디.jpg',
-        '@/assets/genres/판타지.jpg',
-        '@/assets/genres/SF.jpg',
-        '@/assets/genres/TV.jpg',
-      ]
+        '/media/genres/가족.jpg',
+        '/media/genres/공포.jpg',
+        '/media/genres/다큐.jpg',
+        '/media/genres/드라마.jpg',
+        '/media/genres/로맨스.jpg',
+        '/media/genres/모험.jpg',
+        '/media/genres/미스터리.png',
+        '/media/genres/범죄.jpg',
+        '/media/genres/서부.png',
+        '/media/genres/스릴러.jpg',
+        '/media/genres/애니메이션.png',
+        '/media/genres/액션.png',
+        '/media/genres/역사.jpg',
+        '/media/genres/음악.png',
+        '/media/genres/전쟁.jpg',
+        '/media/genres/코미디.png',
+        '/media/genres/판타지.png',
+        '/media/genres/SF.jpg',
+        '/media/genres/TV.png',
+      ],
+      genreId: {
+        0: '10751', 1: '27', 2: '99', 3: '18', 4: '10749', 5: '12', 6: '9648',
+        7: '80', 8: '37', 9: '53', 10: '16', 11: '28', 12: '36', 13: '10402',
+        14: '10752', 15: '35', 16: '14', 17: '878', 18: '10770',
+      },
+      genreMode: false,
     }
   },
   methods: {
@@ -96,32 +115,13 @@ export default {
       const myMenu = document.querySelector('#my-menu')
       myMenu.checked = false
     },
-    getMoviesByMode: function (mode) {
-      axios({
-        method: 'get',
-        // 장고한테 요청
-        url: 'http://127.0.0.1:8000/api/v1/movies/',
-        params: {
-          mode,
-        },
-        headers: this.config
-      })
-      .then((res)=>{
-        // 응답 데이터에서 가능한 페이지 수 데이터만 pop해서 가져온다.
-        this.movieList = res.data
-        this.fetchVideos(this.movieList[0].tmdb_id)
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-    },
+    // 영화 모드 선택
     selectMode: function (mode) {
       this.selectedMode = mode
       this.inputMode = false
       if (['algorithm', 'release_date', 'popularity', 'vote_average'].includes(mode)) {
         axios({
         method: 'get',
-        // 장고한테 요청
         url: 'http://127.0.0.1:8000/api/v1/movies/',
         params: {
           mode,
@@ -129,7 +129,6 @@ export default {
         headers: this.config
       })
       .then((res)=>{
-        // 응답 데이터에서 가능한 페이지 수 데이터만 pop해서 가져온다.
         this.movieList = res.data
         this.fetchVideos(this.movieList[0].tmdb_id)
       })
@@ -138,12 +137,32 @@ export default {
       })
       } else if (['director', 'actor', 'title'].includes(mode)) {
         this.inputMode = true
+      } else if (mode === 'genre') {
+        this.genreMode = true
       }
     },
+    // 인기순, 최신순, 평점순 조회
+    getMoviesByMode: function (mode) {
+      axios({
+        method: 'get',
+        url: 'http://127.0.0.1:8000/api/v1/movies/',
+        params: {
+          mode,
+        },
+        headers: this.config
+      })
+      .then((res)=>{
+        this.movieList = res.data
+        this.fetchVideos(this.movieList[0].tmdb_id)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+    },
+    // 영화명, 감독명, 배우명 조회
     searchInputSubmit: function ($event) {
       axios({
         method: 'get',
-        // 장고한테 요청
         url: 'http://127.0.0.1:8000/api/v1/movies/',
         params: {
           mode: this.selectedMode,
@@ -152,12 +171,33 @@ export default {
         headers: this.config
       })
       .then((res)=>{
-        // 응답 데이터에서 가능한 페이지 수 데이터만 pop해서 가져온다.
         this.movieList = res.data
         this.fetchVideos(this.movieList[0].tmdb_id)
       })
       .catch((err) => {
         console.log(err)
+      })
+    },
+    // 장르별 조회
+    genreSubmit: function (index) {
+      console.log(this.genreId[index])
+      axios({
+        method: 'get',
+        url: 'http://127.0.0.1:8000/api/v1/movies/',
+        params: {
+          mode: this.selectedMode,
+          inputGenre: this.genreId[index]
+        },
+        headers: this.config
+      })
+      .then((res)=>{
+        this.movieList = res.data
+        this.genreMode = false
+        this.fetchVideos(this.movieList[0].tmdb_id)
+      })
+      .catch((err) => {
+        console.log(err)
+        this.$vs.notify({title:'이런!',text:'영화가 아직 없어요😢  업로드를 기대해주세요.',color: 'rgba(0, 0, 0, 0.8)',position:'top-center'})
       })
     },
   },
@@ -279,6 +319,58 @@ input[type=checkbox]:checked + label + div {
   color:rgba(255, 255, 255, 0.8);
   top: 8rem;
   left: 1.2rem;
+}
+
+.genre-images {
+  z-index: 7;
+  position: fixed;
+  padding-top: 6rem;
+  padding-left: 31rem;
+  width: 100%;
+  height: 100%;
+}
+
+.genre-cover {
+  z-index: 6;
+  position: fixed;
+  top: -0.1rem;
+  padding-top: 4rem;
+  padding-left: 31rem;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  opacity: 0.8;
+}
+
+.genre-image {
+  width: 18%;
+  padding: 0.1rem;
+  margin: 0.1rem;
+}
+
+.card {
+  background-color: rgba(0, 0, 0, 0);
+  border: none;
+}
+
+.card > img {
+  border-radius: 10px;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.card > img:hover {
+  width: 95%;
+  transform: translateY(1.5px) rotate(-10deg);
+}
+
+.dif-genre {
+  z-index: 5;
+  position: fixed;
+  color:rgba(255, 255, 255, 0.8);
+  top: 8rem;
+  left: 1.2rem;
+  cursor: pointer;
 }
 </style>
 
