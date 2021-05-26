@@ -9,7 +9,9 @@
       >
       <vs-select-item :key="index" :value="item.value" :text="item.text" v-for="item,index in modes"/>
     </vs-select>
-    <vs-input class="selectInput" color="rgba(255, 255, 255, 0.5)" v-model="selectInputValue"/>
+    <vs-input v-if="inputMode" autofocus class="select-input" color="rgba(255, 255, 255, 0.5)" v-model="selectInputValue" 
+      @focus="inputFocus = true" @blur="inputFocus=false" @keypress.enter="searchInputSubmit($event)"/>
+    <span v-if="!inputFocus && inputMode && !selectInputValue" class="input-icon material-icons">search</span>
     <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0;" @click="uncheck"></div>
     <iframe width="1920" height="1080" :src="videoURI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     <input type="checkbox" id="my-menu">
@@ -54,11 +56,35 @@ export default {
         {text:'최신순',value: 'release_date'},
         {text:'평점순',value: 'vote_average'},
         {text:'영화명',value: 'title'},
-        {text:'감독명',value: 'director'},
-        {text:'배우명',value: 'actor'},
+        {text:'감독명(영문)',value: 'director'},
+        {text:'배우명(영문)',value: 'actor'},
         {text:'장르별',value: 'genre'},
       ],
       selectInputValue: '',
+      selectedMode: '',
+      inputMode: false,
+      inputFocus: false,
+      genreImages:[
+        '@/assets/genres/가족.jpg',
+        '@/assets/genres/공포.jpg',
+        '@/assets/genres/다큐.jpg',
+        '@/assets/genres/드라마.jpg',
+        '@/assets/genres/로맨스.jpg',
+        '@/assets/genres/모험.jpg',
+        '@/assets/genres/미스터리.jpg',
+        '@/assets/genres/범죄.jpg',
+        '@/assets/genres/서부.jpg',
+        '@/assets/genres/스릴러.jpg',
+        '@/assets/genres/애니메이션.jpg',
+        '@/assets/genres/액션.jpg',
+        '@/assets/genres/역사.jpg',
+        '@/assets/genres/음악.jpg',
+        '@/assets/genres/전쟁.jpg',
+        '@/assets/genres/코미디.jpg',
+        '@/assets/genres/판타지.jpg',
+        '@/assets/genres/SF.jpg',
+        '@/assets/genres/TV.jpg',
+      ]
     }
   },
   methods: {
@@ -90,10 +116,50 @@ export default {
       })
     },
     selectMode: function (mode) {
+      this.selectedMode = mode
+      this.inputMode = false
       if (['algorithm', 'release_date', 'popularity', 'vote_average'].includes(mode)) {
-        this.getMoviesByMode(mode)
+        axios({
+        method: 'get',
+        // 장고한테 요청
+        url: 'http://127.0.0.1:8000/api/v1/movies/',
+        params: {
+          mode,
+        },
+        headers: this.config
+      })
+      .then((res)=>{
+        // 응답 데이터에서 가능한 페이지 수 데이터만 pop해서 가져온다.
+        this.movieList = res.data
+        this.fetchVideos(this.movieList[0].tmdb_id)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+      } else if (['director', 'actor', 'title'].includes(mode)) {
+        this.inputMode = true
       }
-    }
+    },
+    searchInputSubmit: function ($event) {
+      axios({
+        method: 'get',
+        // 장고한테 요청
+        url: 'http://127.0.0.1:8000/api/v1/movies/',
+        params: {
+          mode: this.selectedMode,
+          inputValue: $event.target.value,
+        },
+        headers: this.config
+      })
+      .then((res)=>{
+        // 응답 데이터에서 가능한 페이지 수 데이터만 pop해서 가져온다.
+        this.movieList = res.data
+        this.fetchVideos(this.movieList[0].tmdb_id)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+    },
   },
   computed: {
     ...mapState([
@@ -123,16 +189,20 @@ export default {
   cursor: pointer;
   transition: .3s;
 }
+
 #my-menu + label > img {
   border-radius: 100%;
 }
+
 #my-menu + label:hover {
   transform: translateY(1.5px) rotate(-10deg);
   opacity: .7;
 }
+
 input[type=checkbox] { 
   display:none
 }
+
 div[class=sidebar] {
   width: 170px;
   height: 100%;
@@ -144,21 +214,26 @@ div[class=sidebar] {
   z-index: 2;
   transition: all .35s;
 }
+
 input[type=checkbox]:checked + label + div {
   right: 0;
 }
+
 #menu1 {
   margin-top: 6.5rem;
 }
+
 .menu {
   margin-right: 2.1rem;
   color: #818181;
   cursor: pointer;
   font-size: 1.2rem;
 }
+
 .menu > span:hover {
   color: #f1f1f1;
 }
+
 #Main > iframe {
   z-index: -1;
   position: fixed;
@@ -167,6 +242,7 @@ input[type=checkbox]:checked + label + div {
   width: 100%;
   height: 100%;
 }
+
 #logo {
   position: fixed;
   top: 1rem;
@@ -175,6 +251,7 @@ input[type=checkbox]:checked + label + div {
   opacity: 0.7;
   font-size: 3.2rem;
 }
+
 .con-select {
   z-index: 5;
   top: 5rem;
@@ -182,12 +259,26 @@ input[type=checkbox]:checked + label + div {
   color: white;
   opacity: 0.8;
 }
-.selectInput {
+
+.select-input {
+  position: fixed;
   z-index: 5;
-  top: 5rem;
+  top: 7.5rem;
   width: 212px;
   color: rgba(255, 255, 255, 0.8);
   padding-left: 12px;
+}
+
+.vs-input--::placeholder {
+  color: red;
+  font-style: italic;
+}
+
+.input-icon {
+  position: fixed;
+  color:rgba(255, 255, 255, 0.8);
+  top: 8rem;
+  left: 1.2rem;
 }
 </style>
 
@@ -197,6 +288,7 @@ input[type=checkbox]:checked + label + div {
   height: 8px;
   background: #ffffff;
 }
+
 ::-webkit-scrollbar-thumb {
   border-radius: 3.5px;
   background-color: #123763;
@@ -205,6 +297,7 @@ input[type=checkbox]:checked + label + div {
     background-color: #364d69;
   }
 }
+
 ::-webkit-scrollbar-track {
   background: #ffffff;
 }
