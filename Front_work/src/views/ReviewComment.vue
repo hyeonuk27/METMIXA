@@ -1,6 +1,7 @@
 <template>
   <div id='Detail'>
     <!-- 배경 -->
+    <h1 id='logo' @click="$router.push({ name: 'Main' })">METMIXA</h1>
     <img id="bg-backdrop" :src="this.selectedMovieInfo.backdrop_path" alt="" :style="{ width: windowWidth }">
     <div id="bg-cover" :style="{ width: windowWidth }"></div>
     <img id="poster" :src="this.selectedMovieInfo.poster_path" rounded alt="" style="width: 300px; border-radius: 7px;">
@@ -150,7 +151,7 @@ export default {
   name: 'Comment',
   data: function () {
     return {
-      originalRate: '',
+      originalRate: 0,
       currentRate: 1,
       colors: ['#99A9BF', '#F7BA2A', '#FF9900'],
       selectedMovie: '',
@@ -175,6 +176,7 @@ export default {
     }
   },
   methods: {
+    // 별점 주기
     giveRate: function () {
       const rate = this.currentRate
       this.$vs.notify({title:'평점 후원!',text: `${this.nickname}님! ${this.currentRate}점 후원 감사합니다! 😘`,color:'warning',icon:'star'})
@@ -189,7 +191,7 @@ export default {
           }
         })
         .then(res => {
-          console.log(res)
+          this.originalRate = res.data.rate
         })
         .catch(err => {
           console.log(err)
@@ -205,7 +207,6 @@ export default {
           }
         })
         .then(res => {
-          console.log(res)
           this.originalRate = res.data.rate
         })
         .catch(err => {
@@ -248,8 +249,8 @@ export default {
       const created = moment(date).format('YY.MM.DD\u00A0\u00A0HH:MM')
       return created
     },
+    // 리뷰 수정
     updateReview: function (reviewPk) {
-      // 새로 입력된 리뷰
       const newReview = this.selectedReviewInfo.content
       console.log(this.selectedReviewInfo.content)
       axios({
@@ -291,7 +292,7 @@ export default {
         })
       })
     },
-    // 댓글 조회 - 상민 수정 상민 수정 상민 수정 상민 수정 상민 수정
+    // 댓글 조회
     getComments: function () {
       axios({
         method: 'get',
@@ -329,7 +330,6 @@ export default {
     },
     // 댓글 수정
     updateComment: function ($event, commentPk) {
-      // 새로 입력된 댓글
       const newComment = $event.target.value
       axios({
         method: 'put',
@@ -350,15 +350,12 @@ export default {
     },
     // 댓글 제거
     deleteComment: function (commentPk) {
-      console.log(commentPk)
       axios({
         method: 'delete',
         url: `${SERVER.URL}/api/v1/comments/${commentPk}`,
         headers: this.$store.getters.config,
       })
-      // db에서 삭제 후 vue에서 삭제
-      .then((res) => {
-        console.log(res)
+      .then(() => {
         this.getComments()
       })
       .catch(err => {
@@ -368,9 +365,6 @@ export default {
         })
       })
   }},
-  // main page에서 카드를 눌렀을 때 detail page로 이동된 것
-  // detail page가 실행되자마자 영화정보, 영화에 대한 리뷰, 유저가 준 rating, 
-  // django와 통신은 잘됨
   created() {
     const moviePk = this.$route.query.movie
     this.selectedMovie = moviePk
@@ -409,7 +403,6 @@ export default {
     })
     .then(res => {
       this.originalRate = res.data.rate
-      this.currentRate = res.data.rate
     })
     .catch(err => {
       console.log(err)
@@ -469,6 +462,11 @@ export default {
       'nickname',
       'image',
     ])
+  },
+  watch: {
+    originalRate: function (curVal) {
+      this.currentRate = curVal / 20
+    }
   }
 }
 </script>
@@ -485,6 +483,7 @@ export default {
   opacity: 0.9;
   background-color: black;
 }
+
 #bg-backdrop {
   position: fixed; 
   z-index: -2;
@@ -492,12 +491,24 @@ export default {
   left: 0; 
   margin: auto;
 }
+
+#logo {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  color: #f1f1f1;
+  opacity: 0.7;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
 #comment{
   position: absolute;
   top: 35rem;
   left: 23.5rem;
   width: 70rem;
 }
+
 .review-container img {
   position: absolute;
   top: 1.5rem;
@@ -506,17 +517,20 @@ export default {
   margin-right: 20px;
   border-radius: 50%;
 }
+
 .comment-input {
   width: 90% !important;
   display: inline !important;
   top: -1.3rem;
 }
+
 .comment-container {
   border: 2px solid #dedede;
   background-color: #f1f1f1;
   border-radius: 5px;
   margin: 10px 0;
 }
+
 .comment-container img {
   top: 1.5rem;
   left: 1.5rem;
@@ -525,6 +539,7 @@ export default {
   margin-left: 0.3rem;
   margin-top: 0.5rem;
 }
+
 .comment-container p {
   opacity: 0.8;
   padding-top: 1.5rem;

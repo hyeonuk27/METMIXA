@@ -1,5 +1,6 @@
 <template>
   <div b-container cotainer-fluid>
+    <div class="signup-cover"></div>
     <div id="bg" class="carousel slide" :style="{ width: windowWidth }" data-bs-ride="carousel">
       <div class="carousel-inner">
         <div class="carousel-item active" data-bs-interval="4000">
@@ -18,9 +19,9 @@
     <img style="color: #f1f1f1; font-size: 7rem; width: 20rem;" src="../assets/logo_transparent.png">
     <div class="signup">
       <el-card class="signup-card pb-1">
-        <span style="color: #f1f1f1; opacity: 0.7;">"우린 어디쯤 있는 거지?"</span><br>
-        <span style="color: #f1f1f1; opacity: 0.7;">"그냥 흘러가는 대로 가보자"</span><br><br>
-        <span style="color: #f1f1f1; opacity: 0.7;">-영화 '라라랜드' 中</span><br>
+        <span style="z-index: 5; color: #f1f1f1; opacity: 0.7;">"우린 어디쯤 있는 거지?"</span><br>
+        <span style="z-index: 5; color: #f1f1f1; opacity: 0.7;">"그냥 흘러가는 대로 가보자"</span><br><br>
+        <span style="z-index: 5; color: #f1f1f1; opacity: 0.7;">-영화 '라라랜드' 中</span><br>
         <el-form
           class="signup-form mt-3"
           :model="credentials"
@@ -141,15 +142,40 @@ export default {
   left: 0; 
   margin: auto;
 }
+
+.signup-cover {
+  position: fixed;
+  z-index: 3;
+  width: 100vw;
+  height: 100vh;
+  background-color: black;
+  animation: fadeout 1s;
+  animation-fill-mode: forwards;
+  animation-delay: 1s;
+}
+
+@keyframes fadeout {
+    from {
+        z-index: 3;
+        opacity: 1;
+    }
+    to {
+        z-index: -1;
+        opacity: 0;
+    }
+}
+
 .container {
   padding: 16px;
 }
+
 .signup {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
 #signup-button {
   width: 100%;
   margin-top: 40px;
@@ -161,13 +187,16 @@ export default {
   font-size: 16px;
   color: rgba(255, 255, 255, 0.82);
 }
+
 .signup-card{
   background-color: rgba(0, 0, 0, 0.9);
   border-color: rgba(0, 0, 0, 0.9);;
 }
+
 .signup-form {
   width: 290px;
 }
+
 .greeting {
   margin-top: 10px;
   font-size: 13px;

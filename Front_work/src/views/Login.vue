@@ -1,5 +1,13 @@
 <template>
   <div b-container cotainer-fluid>
+    <!-- 커버 화면 -->
+    <div class="login-cover"></div>
+    <div class='cover-textCenter text-slide'>
+      <h1 class="text-slide">감성있게 가볍게</h1>
+      <h2 class="text-slide">MEET 내 취향 영화를 만나고, MIX 생각을 나누는, A 하나의 공간</h2>
+      - METMIXA -
+    </div>
+    <!-- 캐러셀 배경 -->
     <div id="bg" class="carousel slide" :style="{ width: windowWidth }" data-bs-ride="carousel">
       <div class="carousel-inner">
         <div class="carousel-item active" data-bs-interval="4000">
@@ -16,6 +24,7 @@
       </div>
     </div>
     <img style="color: #f1f1f1; font-size: 7rem; width: 20rem;" src="../assets/logo_transparent.png">
+    <!-- 로그인 폼 -->
     <div class="login">
       <el-card class="login-card pb-1">
         <span style="color: #f1f1f1; opacity: 0.7;">"나의 죽음이 나의 삶보다 가취 있기를"</span><br><br>
@@ -100,6 +109,7 @@ export default {
   }
 }
 </script>
+
 <style>
 #bg {
   position: fixed; 
@@ -108,8 +118,66 @@ export default {
   left: 0; 
   margin: auto;
 }
-.container {
-  padding: 16px;
+
+.login-cover {
+  position: fixed;
+  z-index: 3;
+  width: 100vw;
+  height: 100vh;
+  background-color: black;
+  animation: fadeout 3s;
+  animation-fill-mode: forwards;
+  animation-delay: 2s;
+}
+
+@keyframes fadeout {
+    from {
+        z-index: 3;
+        opacity: 1;
+    }
+    to {
+        z-index: -1;
+        opacity: 0;
+    }
+}
+
+.text-slide {
+  animation-name: slide;
+  animation-delay: 2s;
+  animation-duration:2s;
+  animation-duration: leaner;
+  animation-fill-mode: forwards;
+}
+
+@keyframes slide {
+  0% {
+    top: 45%;
+    transform: scale(1)
+  }
+  100% {
+    top: 83%;
+    transform: scale(0.8)
+  } 
+}
+
+.cover-textCenter {
+  position: fixed;
+  width: 100%;
+  top: 45%;
+  left: 2%;
+  z-index: 6;
+  margin-left: -50px;
+  margin-top: -25px;
+  color: rgba(255, 255, 255, 0.82);
+  font-family: 'Nanum Myeongjo', serif;
+}
+
+.cover-textCenter > h2 {
+  font-family: 'Nanum Myeongjo', serif;
+}
+
+.cover-textCenter > h1  {
+  padding-bottom: 1rem;
 }
 
 .login {

@@ -1,7 +1,7 @@
 <template>
   <div id='Detail'>
     <!-- 배경 -->
-    <h1 id='logo'>METMIXA</h1>
+    <h1 id='logo' @click="$router.push({ name: 'Main' })">MET<span style="color: crimson;">MIX</span>A</h1>
     <img id="bg-backdrop" :src="this.selectedMovieInfo.backdrop_path" alt="" :style="{ width: windowWidth }">
     <div id="bg-cover" :style="{ width: windowWidth }"></div>
     <img id="poster" :src="this.selectedMovieInfo.poster_path" rounded alt="" style="width: 300px; border-radius: 7px;">
@@ -56,7 +56,7 @@
     <div id="review" class="pb-5">
       <!-- 리뷰 작성 -->
       <div class="chat-container" style="background-color: rgba(255, 255, 255, 0.9); height: 65px; padding: 10px;">
-        <vs-input icon="mode_edit" class="inputx review-input text-start" v-model="reviewText" @keypress.enter="createReview"/>
+        <vs-input icon="mode_edit" class="inputx review-input text-start" v-model="reviewText" :placeholder="nickname+'님, 남기고 싶은 말이 있으신가요?'" @keypress.enter="createReview"/>
       </div>
       <vs-collapse accordion class="p-0">
         <div v-for="(review, idx) in reviews" :key="idx" class="chat-container d-flex align-items-center" style="background-color: rgba(255, 255, 255, 0.9); transition: 0.3s">
@@ -97,8 +97,7 @@ export default {
   name: 'Detail',
   data: function () {
     return {
-      //  별점 주기
-      originalRate: '',
+      originalRate: 0,
       currentRate: 1,
       colors: ['#99A9BF', '#F7BA2A', '#FF9900'],
       reviewText: '',
@@ -203,7 +202,7 @@ export default {
           }
         })
         .then(res => {
-          console.log(res)
+          this.originalRate = res.data.rate
         })
         .catch(err => {
           console.log(err)
@@ -259,15 +258,15 @@ export default {
     },
     humanize: function (date) {
       const moment = require('moment')
+      const now = new Date()
+      console.log(moment(now).format('YY.MM.DD\u00A0\u00A0HH:MM'))
       const created = moment(date).format('YY.MM.DD\u00A0\u00A0HH:MM')
       return created
     }
   },
   // main page에서 카드를 눌렀을 때 detail page로 이동된 것
   // detail page가 실행되자마자 영화정보, 영화에 대한 리뷰, 유저가 준 rating, 
-  // django와 통신은 잘됨
   created() {
-    // console.log(this.$store.state.authToken)
     const moviePk = this.$route.query.moviePk
     this.selectedMovie = moviePk
     // 영화정보
@@ -290,7 +289,6 @@ export default {
     })
     .then(res => {
       this.originalRate = res.data.rate
-      this.currentRate = res.data.rate
     })
     .catch(err => {
       console.log(err)
@@ -346,15 +344,20 @@ export default {
     document.removeEventListener('scroll', this.detailCheckBottom)
   },
   computed: {
-      vote_average: function () {
-        const result = ((this.selectedMovieInfo.tmdb_vote_sum + this.selectedMovieInfo.our_vote_sum*2) / (this.selectedMovieInfo.tmdb_vote_cnt + this.selectedMovieInfo.our_vote_cnt)).toFixed(1)
-        return result*10
-      },
-      ...mapState([
-        'nickname',
-        'image',
-      ])
+    vote_average: function () {
+      const result = ((this.selectedMovieInfo.tmdb_vote_sum + this.selectedMovieInfo.our_vote_sum*2) / (this.selectedMovieInfo.tmdb_vote_cnt + this.selectedMovieInfo.our_vote_cnt)).toFixed(1)
+      return result*10
+    },
+    ...mapState([
+      'nickname',
+      'image',
+    ])
+  },
+  watch: {
+    originalRate: function (curVal) {
+      this.currentRate = curVal / 20
     }
+  }
 }
 </script>
 
@@ -380,12 +383,13 @@ export default {
 }
 
 #logo {
-  position: fixed;
+  position: absolute;
   top: 1rem;
-  left: 0.75rem;
+  left: 1rem;
   color: #f1f1f1;
   opacity: 0.7;
-  font-size: 3.2rem;
+  font-size: 2rem;
+  cursor: pointer;
 }
 
 #poster {

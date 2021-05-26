@@ -11,8 +11,15 @@
     </vs-select>
     <vs-input v-if="inputMode" autofocus class="select-input" color="rgba(255, 255, 255, 0.5)" v-model="selectInputValue" 
       @focus="inputFocus = true" @blur="inputFocus=false" @keypress.enter="searchInputSubmit($event)"/>
-    <span v-if="!inputFocus && inputMode && !selectInputValue" class="input-icon material-icons">search</span>
+    <span v-if="!inputFocus && inputMode && !selectInputValue" class="mode-icon material-icons">search</span>
+    <span v-if="selectedMode === 'algorithm'" class="mode-icon material-icons">recommend</span>
+    <span v-if="selectedMode === 'release_date'" class="mode-icon material-icons">schedule</span>
+    <span v-if="selectedMode === 'popularity'" class="mode-icon material-icons">auto_awesome</span>
+    <span v-if="selectedMode === 'vote_average'" class="mode-icon material-icons">poll</span>
+    <span v-if="selectedMode === 'popularity'" class="mode-icon material-icons">auto_awesome</span>
     <div v-if="genreMode" class="genre-cover"></div>
+    <span v-if="genreMode" class="material-icons" style="position: absolute; z-index: 8; top: 4.5rem; left: 26.5rem;color: rgba(255, 255, 255, 0.8); cursor: pointer;" 
+      @click="genreMode = false">close</span>
     <div v-if="genreMode" class="genre-images">
       <div class="row row-cols-1 row-cols-md-2 g-4" style="width: 70%;">
         <div class="genre-image col" v-for="(image, index) in genreImages" :key="index">
@@ -65,16 +72,16 @@ export default {
       mode: 'algorithm',
       modes:[
         {text:'추천 영화',value: 'algorithm'},
+        {text:'장르별',value: 'genre'},
         {text:'인기순',value: 'popularity'},
         {text:'최신순',value: 'release_date'},
         {text:'평점순',value: 'vote_average'},
         {text:'영화명',value: 'title'},
         {text:'감독명(영문)',value: 'director'},
         {text:'배우명(영문)',value: 'actor'},
-        {text:'장르별',value: 'genre'},
       ],
       selectInputValue: '',
-      selectedMode: '',
+      selectedMode: 'algorithm',
       inputMode: false,
       inputFocus: false,
       genreImages:[
@@ -119,6 +126,7 @@ export default {
     selectMode: function (mode) {
       this.selectedMode = mode
       this.inputMode = false
+      this.selectInputValue = ''
       if (['algorithm', 'release_date', 'popularity', 'vote_average'].includes(mode)) {
         axios({
         method: 'get',
@@ -286,7 +294,7 @@ input[type=checkbox]:checked + label + div {
 #logo {
   position: fixed;
   top: 1rem;
-  left: 0.75rem;
+  left: 1rem;
   color: #f1f1f1;
   opacity: 0.7;
   font-size: 3.2rem;
@@ -314,11 +322,12 @@ input[type=checkbox]:checked + label + div {
   font-style: italic;
 }
 
-.input-icon {
+.mode-icon {
   position: fixed;
   color:rgba(255, 255, 255, 0.8);
-  top: 8rem;
+  top: 7.8rem;
   left: 1.2rem;
+  font-size: 2rem;
 }
 
 .genre-images {

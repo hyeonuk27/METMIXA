@@ -1,5 +1,6 @@
 <template>
   <div id="profile_main">
+    <h1 id='logo' @click="$router.push({ name: 'Main' })">METMIXA</h1>
     <!-- 유저 이름, 닉네임, 사진 -->
     <UserInfo
     class="d-block"
@@ -95,6 +96,16 @@ export default {
   min-height: 100vh;
   margin: 0;
   padding: 0;
+}
+
+#logo {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  color: #f1f1f1;
+  opacity: 0.7;
+  font-size: 2rem;
+  cursor: pointer;
 }
 
 #masonry_layer {
