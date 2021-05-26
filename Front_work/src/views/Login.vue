@@ -25,7 +25,7 @@
           :model="credentials"
           :rules="rules"
           ref="form"
-          @submit.native.prevent="login(credentials)"
+          @submit.native.prevent="isValid"
         >
           <el-form-item prop="username">
             <el-input v-model="credentials.username" placeholder="아이디" prefix-icon="fas fa-user"></el-input>
@@ -54,36 +54,51 @@
 </template>
 
 <script>
-  import { mapActions } from 'vuex'
-  export default {
-    name: 'Login',
-    data() {
-      return {
-        credentials: {
-          username: '',
-          password: '',
-        },
-        windowWidth: parseInt(screen.availWidth)+"px",
-        rules: {
-          username: [
-            {
-              required: true,
-              message: "Username is required",
-              trigger: "blur"
-            },
-          ],
-          password: [
-            { required: true, message: "Password is required", trigger: "blur" },
-          ]
-        }
+import swal from 'sweetalert'
+import { mapActions } from 'vuex'
+
+export default {
+  name: 'Login',
+  data() {
+    return {
+      credentials: {
+        username: '',
+        password: '',
+      },
+      windowWidth: parseInt(screen.availWidth)+"px",
+      rules: {
+        username: [
+          {
+            required: true,
+            message: "Username is required",
+            trigger: "blur"
+          },
+        ],
+        password: [
+          { required: true, message: "Password is required", trigger: "blur" },
+        ]
       }
-    },
-    methods: {
-      ...mapActions([
-        'login',
-      ]),
+    }
+  },
+  methods: {
+    ...mapActions([
+      'login',
+    ]),
+    isValid: function () {
+      if (this.credentials.username === '') {
+        swal ("아이디를 입력하세요.", {
+          dangerMode: true,
+        })
+      } else if (this.credentials.password === '') {
+        swal ("비밀번호를 입력하세요.", {
+          dangerMode: true,
+        })
+      } else {
+        this.login(this.credentials)
+      }
     }
   }
+}
 </script>
 <style>
 #bg {

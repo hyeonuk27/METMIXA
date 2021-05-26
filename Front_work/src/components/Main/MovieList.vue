@@ -91,7 +91,7 @@ export default {
 
 <style>
 .img {
-  margin-top: 35rem;
+  margin-top: 32rem;
   left: 0%;
   height: 100%;
   width: 100%;

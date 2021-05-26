@@ -7,7 +7,7 @@
     <!-- 유저 정보 변경을 위한 modal-->
     <!-- v-for로 반복 돌리기 -->
     <div id="masonry_layer" class="container">
-      <vue-masonry-wall :items="photoTickets" :options="{width: 300, padding: 8}" class="m-0 mansory_template">
+      <vue-masonry-wall :items="photoTickets" :options="{width: 300, padding: 8}" class="m-0 mansory_template pb-5">
           <template v-slot:default="{item}">
             <!-- item은 포토티켓 객체. movie_id는 movie라는 이름으로 접근 -->
             <div class="item photo_ticket d-inline-block" @click="$router.push({ name: 'Detail', query: { moviePk: `${item.movie}`}})">

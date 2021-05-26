@@ -1,6 +1,15 @@
 <template>
   <div id='Main'>
     <h1 id='logo'>METMIXA</h1>
+    <vs-select
+      class="selectMode"
+      v-model="mode"
+      color="#123763"
+      @change="selectMode"
+      >
+      <vs-select-item :key="index" :value="item.value" :text="item.text" v-for="item,index in modes"/>
+    </vs-select>
+    <vs-input class="selectInput" color="rgba(255, 255, 255, 0.5)" v-model="selectInputValue"/>
     <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0;" @click="uncheck"></div>
     <iframe width="1920" height="1080" :src="videoURI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     <input type="checkbox" id="my-menu">
@@ -38,6 +47,18 @@ export default {
     return {
       movieList: [],
       SERVER_URL: SERVER.URL,
+      mode: 'algorithm',
+      modes:[
+        {text:'추천 영화',value: 'algorithm'},
+        {text:'인기순',value: 'popularity'},
+        {text:'최신순',value: 'release_date'},
+        {text:'평점순',value: 'vote_average'},
+        {text:'영화명',value: 'title'},
+        {text:'감독명',value: 'director'},
+        {text:'배우명',value: 'actor'},
+        {text:'장르별',value: 'genre'},
+      ],
+      selectInputValue: '',
     }
   },
   methods: {
@@ -49,6 +70,30 @@ export default {
       const myMenu = document.querySelector('#my-menu')
       myMenu.checked = false
     },
+    getMoviesByMode: function (mode) {
+      axios({
+        method: 'get',
+        // 장고한테 요청
+        url: 'http://127.0.0.1:8000/api/v1/movies/',
+        params: {
+          mode,
+        },
+        headers: this.config
+      })
+      .then((res)=>{
+        // 응답 데이터에서 가능한 페이지 수 데이터만 pop해서 가져온다.
+        this.movieList = res.data
+        this.fetchVideos(this.movieList[0].tmdb_id)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+    },
+    selectMode: function (mode) {
+      if (['algorithm', 'release_date', 'popularity', 'vote_average'].includes(mode)) {
+        this.getMoviesByMode(mode)
+      }
+    }
   },
   computed: {
     ...mapState([
@@ -61,37 +106,12 @@ export default {
     ])
   },
   created: function () {
-    axios({
-      method: 'get',
-      // 장고한테 요청
-      url: 'http://127.0.0.1:8000/api/v1/movies/',
-      params: {
-        mode: 'algorithm',
-      },
-      headers: this.config
-    })
-    .then((res)=>{
-      // 응답 데이터에서 가능한 페이지 수 데이터만 pop해서 가져온다.
-      this.movieList = res.data
-      this.fetchVideos(this.movieList[0].tmdb_id)
-    })
-    .catch((err) => {
-      console.log(err)
-    })
+    this.getMoviesByMode('algorithm')
   }
 }
 </script>
 
 <style scoped>
-
-/* img {
-  position: fixed; 
-  top: 0; 
-  left: 0; 
-  min-width: 100%;
-  min-height: 100%;
-} */
-
 #my-menu + label{
   position: fixed;
   z-index: 3;
@@ -103,20 +123,16 @@ export default {
   cursor: pointer;
   transition: .3s;
 }
-
 #my-menu + label > img {
   border-radius: 100%;
 }
-
 #my-menu + label:hover {
   transform: translateY(1.5px) rotate(-10deg);
   opacity: .7;
 }
-
 input[type=checkbox] { 
   display:none
 }
-
 div[class=sidebar] {
   width: 170px;
   height: 100%;
@@ -128,26 +144,21 @@ div[class=sidebar] {
   z-index: 2;
   transition: all .35s;
 }
-
 input[type=checkbox]:checked + label + div {
   right: 0;
 }
-
 #menu1 {
   margin-top: 6.5rem;
 }
-
 .menu {
   margin-right: 2.1rem;
   color: #818181;
   cursor: pointer;
   font-size: 1.2rem;
 }
-
 .menu > span:hover {
   color: #f1f1f1;
 }
-
 #Main > iframe {
   z-index: -1;
   position: fixed;
@@ -156,7 +167,6 @@ input[type=checkbox]:checked + label + div {
   width: 100%;
   height: 100%;
 }
-
 #logo {
   position: fixed;
   top: 1rem;
@@ -165,5 +175,37 @@ input[type=checkbox]:checked + label + div {
   opacity: 0.7;
   font-size: 3.2rem;
 }
+.con-select {
+  z-index: 5;
+  top: 5rem;
+  left: 0.75rem;
+  color: white;
+  opacity: 0.8;
+}
+.selectInput {
+  z-index: 5;
+  top: 5rem;
+  width: 212px;
+  color: rgba(255, 255, 255, 0.8);
+  padding-left: 12px;
+}
+</style>
 
+<style lang="scss">
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 3.5px;
+  background-color: #123763;
+
+  &:hover {
+    background-color: #364d69;
+  }
+}
+::-webkit-scrollbar-track {
+  background: #ffffff;
+}
 </style>

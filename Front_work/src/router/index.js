@@ -90,7 +90,8 @@ router.beforeEach((to, from, next) => {
     next()
   }
 
-  if ((from.name === 'Main' && to.name === 'Login') || (from.name === 'Login' && to.name === 'Signup') || (from.name === 'Signup' && to.name === 'Login') || (from.name === 'Comment' && to.name === 'Detail')) {
+  if ((from.name === 'Main' && to.name === 'Login') || (from.name === 'Login' && to.name === 'Signup') || (from.name === 'Signup' && to.name === 'Login') ||
+  (from.name === 'Comment' && to.name === 'Detail') || (from.name === 'Detail' && to.name === 'Profile')) {
     next()
     window.location.reload()
   }

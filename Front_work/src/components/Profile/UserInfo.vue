@@ -9,7 +9,7 @@
           </a>
         </el-tooltip>
       </span>
-      <h2>{{ nickname }}님의 공간</h2>
+      <h2 style="font-size: 30px;">{{ nickname }}님의 공간</h2>
     </header>
 
     <div class="modal fade p-0" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
@@ -61,6 +61,7 @@
 <script>
 import { mapState, mapActions } from 'vuex'
 import SERVER from '@/api/drf.js'
+import swal from 'sweetalert'
 
 export default {
   name: "UserInfo",
@@ -91,10 +92,20 @@ export default {
       this.credentials.newImage = event.target.files[0]
     },
     sendImageToServer () {
-      const formData = new FormData()
-      formData.append('image', this.credentials.newImage)
-      formData.append('nickname', this.credentials.newNickname)
-      this.profileUpdate(formData)
+      if (this.credentials.newNickname === '') {
+        swal ("닉네임을 입력해주세요.", {
+          dangerMode: true,
+        })
+      } else if (this.credentials.newImage === '') {
+        swal ("이미지를 선택해주세요.", {
+          dangerMode: true,
+        })
+      } else {
+        const formData = new FormData()
+        formData.append('image', this.credentials.newImage)
+        formData.append('nickname', this.credentials.newNickname)
+        this.profileUpdate(formData)
+      }
     },
     ...mapActions([
       'profileUpdate',
@@ -112,7 +123,7 @@ export default {
 <style>
 #header {
   text-align: center;
-  padding: 6em 0 4em 0;
+  padding: 6em 0 3em 0;
 }
 
 h2 {

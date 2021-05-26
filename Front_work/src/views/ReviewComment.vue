@@ -58,7 +58,8 @@
       <div style="width: 100%; background-color: rgb(231, 231, 230); border-radius: 5px;">
         <div class="review-container" style="width: 100%; background-color: rgb(231, 231, 230); border-radius: 5px;">
           <div class="d-flex align-items-center">
-            <img :src="SERVER_URL+selectedReviewInfo.user.image" alt="">
+            <img v-if="SERVER_URL+selectedReviewInfo.user.image === SERVER_URL+'null'" src="@/assets/default_profile.jpg" alt="Avatar">
+            <img v-else :src="SERVER_URL+selectedReviewInfo.user.image" alt="Avatar">
             <p class="text-start" style="padding-top: 2.7rem; padding-left: 6rem; padding-bottom: 1.4rem; margin-bottom: 0.2rem; opacity: 0.8;">
               <span class="fw-bold me-2">{{ selectedReviewInfo.user.nickname }}</span> | 
               <span v-if="humanize(review.created_at) === humanize(review.updated_at)" class="ms-2">{{ humanize(selectedReviewInfo.created_at) }}</span>
@@ -100,7 +101,8 @@
         <div v-for="(comment, idx) in comments" :key="idx" class="comment-container" style="background-color: rgba(255, 255, 255, 0.9); transition: 0.3s">
           <div class="d-flex align-items-center">
             <span class="material-icons" style="transform:rotate(180deg); margin-top: 0.5rem; margin-left: 0.5rem;">reply</span>
-            <img :src="SERVER_URL + comment.user.image">
+            <img v-if="SERVER_URL+comment.user.image === SERVER_URL+'null'" src="@/assets/default_profile.jpg" alt="Avatar">
+            <img v-else :src="SERVER_URL+comment.user.image" alt="Avatar">
             <p class="text-start"><span class="fw-bold me-2">{{ comment.user.nickname }}</span>|<span v-if="humanize(comment.created_at) === humanize(comment.updated_at)" class="ms-2">{{ humanize(comment.created_at) }}</span>
               <span v-else class="ms-2">{{ humanize(selectedReviewInfo.updated_at) }}</span>
             </p>

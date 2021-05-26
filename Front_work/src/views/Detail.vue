@@ -61,7 +61,9 @@
         <div v-for="(review, idx) in reviews" :key="idx" class="chat-container d-flex align-items-center" style="background-color: rgba(255, 255, 255, 0.9); transition: 0.3s">
           <vs-collapse-item class="w-100">
             <div slot="header" class="d-flex justify-content-start align-items-center">
-              <img :src="SERVER_URL+review.user.image" alt="Avatar" style="width:100%; margin-left: 10px;">
+              <!-- <img :src="SERVER_URL+review.user.image" alt="Avatar" style="width:100%; margin-left: 10px;"> -->
+              <img v-if="SERVER_URL+review.user.image === SERVER_URL+'null'" src="@/assets/default_profile.jpg" alt="Avatar" style="width:100%; margin-left: 10px;">
+              <img v-else :src="SERVER_URL+review.user.image" alt="Avatar" style="width:100%; margin-left: 10px;">
               <!-- 너무 긴 리뷰가 적힐 경우 ...으로 축약 -->
               <span class="me-3">{{ review.user.nickname }}</span>
               <p class="m-0 text-truncate text-start fw-bold" style="font-size: 17px; opacity: 0.8;">{{ review.content }}</p>

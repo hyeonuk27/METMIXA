@@ -28,7 +28,7 @@ export default new Vuex.Store({
       }
     },
     videoURI: function (state) {
-      return `https://www.youtube.com/embed/${state.videoKey}?controls=1&rel=0&autoplay=1&mute=1&loop=1&playlist=${state.videoKey}`
+      return `https://www.youtube.com/embed/${state.videoKey}?controls=0&rel=0&autoplay=1&mute=1&loop=1&playlist=${state.videoKey}`
     },
   },
   mutations: {
@@ -60,8 +60,7 @@ export default new Vuex.Store({
         this.dispatch('getProfiles')
         router.push({ name: 'Main' })
       })
-      .catch((err) => {
-        console.log(err)
+      .catch(() => {
         swal ("아이디와 비밀번호를 확인해주세요", {
           dangerMode: true,
         })
@@ -78,18 +77,15 @@ export default new Vuex.Store({
         data: credentials,
       })
       .then(() => {
-        router.push({ name: 'Login' })
         this.dispatch('login', credentials)
       })
       .catch((err) => {
-        console.log(err)
-        swal ("아이디와 비밀번호를 확인해주세요", {
+        swal (err.response.data.error, {
           dangerMode: true,
         })
       })
     },
     getProfiles: function ({ commit, getters }) {
-      console.log('바뀜')
       axios({
         method: 'get',
         url: `${SERVER.URL}/api/v2/profile/`,
@@ -100,8 +96,7 @@ export default new Vuex.Store({
         const image = `${SERVER.URL}` + res.data.image
         commit('GET_PROFILE', {nickname, image})
       })
-      .catch((err) => {
-        console.log(err)
+      .catch(() => {
       })
     },
     profileUpdate: function ({ commit, getters }, credentials) {
@@ -117,8 +112,7 @@ export default new Vuex.Store({
         commit('GET_PROFILE', {nickname, image})
       })
       .catch((err) => {
-        console.log(err)
-        swal ("일치하는 닉네임이 존재합니다!", {
+        swal (err.response.data.error, {
           dangerMode: true,
         })
       })

@@ -25,6 +25,9 @@ def signup(request):
     if User.objects.filter(nickname=request.data.get('nickname')).exists():
         return Response({'error': '일치하는 닉네임이 존재합니다.'}, status=status.HTTP_400_BAD_REQUEST)
 
+    if User.objects.filter(username=request.data.get('username')).exists():
+        return Response({'error': '일치하는 아이디가 존재합니다.'}, status=status.HTTP_400_BAD_REQUEST)
+
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
         user = serializer.save()
@@ -43,7 +46,7 @@ def profile(request):
         return Response(serializer.data)
     elif request.method == 'PUT':
         image = request.data.get('image')
-        if User.objects.filter(nickname=request.data.get('nickname')).exists():
+        if request.user.nickname != request.data.get('nickname') and User.objects.filter(nickname=request.data.get('nickname')).exists():
             return Response({'error': '일치하는 닉네임이 존재합니다.'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = UserProfileSerializer(request.user, data=request.data)
         if serializer.is_valid(raise_exception=True):

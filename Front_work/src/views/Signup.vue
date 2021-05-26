@@ -26,7 +26,7 @@
           :model="credentials"
           :rules="rules"
           ref="form"
-          @submit.native.prevent="onUpload"
+          @submit.native.prevent="isValid"
         >
           <el-form-item prop="nickname">
             <el-input v-model="credentials.nickname" placeholder="닉네임" prefix-icon="fas fa-user"></el-input>
@@ -77,11 +77,7 @@
 
 <script>
 import { mapActions } from 'vuex'
-// import default_profile from '@/assets/default_profile.jpg'
-// console.log(typeof('@/assets/default_profile.jpg'))
-// const imageFile = new XMLHttpRequest()
-// imageFile.open("GET", "@/assts/default_profile.jpg", false)
-// console.log(imageFile)
+import swal from 'sweetalert'
 
 export default {
   name: 'Signup',
@@ -125,16 +121,14 @@ export default {
     goProfile() {
       this.$router.push({name: 'Profile'})
     },
-    onUpload: function () {
-      // console.log(this.credentials.image)
-      // let imageData = new FormData()
-      // imageData.append('image', this.image)
-      // this.credentials.image = imageData
-      // for (var value of this.credentials.image.values()) {
-      // console.log(value);
-      // }
-      // console.log(this.credentials.image)
-      this.signup(this.credentials)
+    isValid: function () {
+      if (this.credentials.nickname === '' || this.credentials.username === '' || this.credentials.password === '' || this.credentials.passwordConfirmation == '') {
+        swal ("필수 정보를 모두 입력해주세요.", {
+          dangerMode: true,
+        })
+      } else {
+        this.signup(this.credentials)
+      }
     }
   },
 }
