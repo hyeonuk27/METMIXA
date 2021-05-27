@@ -14,31 +14,31 @@
 
 # 결과물 Preview
 
-![image (1)](README.assets/image (1).png)
+![image1](README.assets/image1.png)
 
-![image (2)](README.assets/image (2).png)
+![image2](README.assets/image2.png)
 
-![image (3)](README.assets/image (3).png)
+![image3](README.assets/image3.png)
 
-![image (4)](README.assets/image (4).png)
+![image4](README.assets/image4.png)
 
-![image (5)](README.assets/image (5).png)
+![image5](README.assets/image5.png)
 
-![image (6)](README.assets/image (6).png)
+![image6](README.assets/image6.png)
 
-![image (7)](README.assets/image (7).png)
+![image7](README.assets/image7.png)
 
-![image (8)](README.assets/image (8).png)
-
-<br/>
+![image8](README.assets/image8.png)
 
 <br/>
 
 <br/>
 
-# 개발 환경
+<br/>
 
-## 1. 개발 스택
+## 개발 환경
+
+### 1. 개발 스택
 
 - Python
 - Django
@@ -51,7 +51,7 @@
 
 <br/>
 
-## 2. 설치
+### 2. 설치
 
 + python
 
@@ -75,7 +75,7 @@ npm run serve
 
 <br/>
 
-# 목표 설정
+## 목표 설정
 
 - 한 학기동안 사용한 모든 툴을 활용해볼 것
 - 1️⃣등 하기
@@ -88,17 +88,17 @@ npm run serve
 
 <br/>
 
-# Design Thinking
+## Design Thinking
 
-## 1. 페르소나 (타겟)
+### 1. 페르소나 (타겟)
 
-### 페르소나1
+#### 페르소나1
 
 - 복잡한 UI를 싫어하고 감성과 편리함을 추구하는 MZ세대
 - 디지털 환경에 익숙하고 최신 트랜드와 남과 다른 이색적인 경험을 추구
 - 개인의 행복 개인화 차별화
 
-### 페르소나2
+#### 페르소나2
 
 - 영화 정보와 리뷰 사이트를 이용하고 싶은 저시력 시각 장애인
 
@@ -106,7 +106,7 @@ npm run serve
 
 <br/>
 
-## 2. POV (Point of View)
+### 2. POV (Point of View)
 
 - 영화에 관심이 많은 MZ세대는 감성적인 UI를 가지면서도 간편하게 사용할 수 있는 영화 정보 사이트가 필요하다. 왜냐하면 MZ세대는 더 이상 글을 선호하지 않고 감성적인 디자인을 추구하며, 3번의 클릭 내에 웹사이트의 모든 곳을 갈 수 없는 웹사이트는 사용자의 경험을 감소시키기 때문이다.
 - 저시력 시각 장애인은 자신이 선택한 부분에 대한 텍스트를 읽어주는 서비스가 필요하다. 왜냐하면 저시력 시각 장애인은 화면의 UI를 어느정도 인식해 원하는 작업을 할 수 있지만 텍스트 정보를 읽는 데에 불편함을 겪고 있기 때문이다.
@@ -115,7 +115,7 @@ npm run serve
 
 <br/>
 
-## 3. HMW (How might we)
+### 3. HMW (How might we)
 
 - 글을 최대한 줄인 영상, 이미지 위주의 UI설계
 - 3번의 클릭 내에 사이트의 모든 곳에 도달할 수 있도록 페이지 설계
@@ -127,7 +127,7 @@ npm run serve
 
 <br/>
 
-# Web page prototype
+## Web page prototype
 
 ![Figma__](README.assets/Figma__.png)
 
@@ -137,7 +137,7 @@ npm run serve
 
 <br/>
 
-# ERD
+## ERD
 
 ![__(1)](README.assets/__(1).png)
 
@@ -169,9 +169,9 @@ npm run serve
 
 <br/>
 
-# Back end
+## Back end
 
-## 0. 구조
+### 0. 구조
 
 - api(프로젝트)
 - account(계정 앱)
@@ -181,7 +181,7 @@ npm run serve
 
 <br/>
 
-## 1. MtoM에서 원하는 필드 추가하는 법
+### 1. MtoM에서 원하는 필드 추가하는 법
 
 ```python
 from django.db import models
@@ -215,7 +215,7 @@ class Reservation(models.Model):
 
 <br/>
 
-## 2. DB 구축 API에서 장르-영화, 영화-감독, 영화-배우 간 M:N 관계 설정해주기
+### 2. DB 구축 API에서 장르-영화, 영화-감독, 영화-배우 간 M:N 관계 설정해주기
 
 - 문제 상황
     - tmdb API를 통해 정보를 받아와 장르, 영화, 감독, 배우 테이블을 `bulk_create` 를 통해 구성
@@ -246,7 +246,7 @@ for data in req.get('crew'):
 
 <br/>
 
-## 3. Movie 정보를 받아올 때 DB에 영화가 존재하는지에 따라 업데이트/생성 분기
+### 3. Movie 정보를 받아올 때 DB에 영화가 존재하는지에 따라 업데이트/생성 분기
 
 - 구현 목표
     - API를 통해 Movie 정보를 받아올 때 분기가 발생
@@ -276,7 +276,7 @@ else:
 
 <br/>
 
-## 4. 사용자 API
+### 4. 사용자 API
 
 - 사용자 API
     - 데코레이터를 통해 인증된 사용자만 사용 가능, 일부는 관리자만 사용 가능
@@ -332,7 +332,7 @@ for genre in genres:
 
 <br/>
 
-## 5. 추천 알고리즘
+### 5. 추천 알고리즘
 
 - `random.choices` 를 활용하여 각 장르에 가중치를 주고 랜덤한 장르를 6개 뽑아서 추천(중복 가능)
     - choices는 중복을 허용하기 때문에 뽑히는 장르들 또한 중복값이 존재(ex. 12 12 23 24)
@@ -370,7 +370,7 @@ def movie_list(request):
 
 <br/>
 
-## 6. 영화 조회 및 검색
+### 6. 영화 조회 및 검색
 
 - Select 박스를 통해 사용자가 선택한 방식에 따라 영화들을 뿌려줌
     - 위의 추천 알고리즘 코드에 이어서 작성된 부분
@@ -410,9 +410,9 @@ def movie_list(request):
 
 <br/>
 
-# Front end
+## Front end
 
-## Login Page
+### Login Page
 
 - CSS 애니메이션을 통해 splash screen 구현
     - `opacity` 와 `position` 조절
@@ -508,7 +508,7 @@ def movie_list(request):
 
 <br/>
 
-## Signup Page
+### Signup Page
 
 - 웹페이지를 켰을 때 브라우저 창 크기로 캐러샐 크기 정해짐
     - 브라우저 창 최대 크기를 알아야 함
@@ -525,7 +525,7 @@ def movie_list(request):
 
 <br/>
 
-## Profile Page
+### Profile Page
 
 - 구현 기능
     - Detail Page 혹은 ReviewComment Page에서 담은 포토티켓을 확인할 수 있음
@@ -615,7 +615,7 @@ checkBottom: function () {
 
 <br/>
 
-## Main Page
+### Main Page
 
 - 구현 기능
     - `Carousel`형태의 추천된 영화 리스트
@@ -632,7 +632,7 @@ checkBottom: function () {
 
 <br/>
 
-## Detail Page
+### Detail Page
 
 - 구현 기능
     - Main Page에서 선택한 영화의 상세정보 제공
@@ -677,7 +677,7 @@ humanize: function (now, date) {
 
 <br/>
 
-## ReviewComment Page
+### ReviewComment Page
 
 - 구현 기능
     - 영화에 대한 게시글 UD, 댓글 CRUD
@@ -696,7 +696,7 @@ humanize: function (now, date) {
 
 <br/>
 
-## Etc
+### Etc
 
 - Mixed spaces and tabs no-mixed-spaces-and-tabs
 - `스페이스바`와 `Tab`키를 혼용해서 `띄어쓰기`를 사용해서 일어난 에러
@@ -709,7 +709,7 @@ humanize: function (now, date) {
 
 <br/>
 
-# 최종 리뷰
+## 최종 리뷰
 
 + 백엔드부터 시작해 프론트엔드에 이르기까지 전과정의 코딩 작업을 수행하는 메인 개발자의 역할을 맡아 처음으로 규모 있는 프로젝트를 진행해보았다.
 + 백엔드와 프론트엔드를 연결하면서 가장 중요한 것은 **설계**라는 것을 절실히 깨달았다.
