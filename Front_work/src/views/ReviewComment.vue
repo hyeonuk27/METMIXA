@@ -1,7 +1,7 @@
 <template>
   <div id='Detail'>
     <!-- 배경 -->
-    <h1 id='logo' @click="$router.push({ name: 'Main' })">METMIXA</h1>
+    <h1 id='logo' @click="$router.push({ name: 'Main' })">MET<span style="color: rgba(140, 100, 172, 0.8);">MIX</span>A</h1>
     <img id="bg-backdrop" :src="this.selectedMovieInfo.backdrop_path" alt="" :style="{ width: windowWidth }">
     <div id="bg-cover" :style="{ width: windowWidth }"></div>
     <img id="poster" :src="this.selectedMovieInfo.poster_path" rounded alt="" style="width: 300px; border-radius: 7px;">
@@ -63,8 +63,8 @@
             <img v-else :src="SERVER_URL+selectedReviewInfo.user.image" alt="Avatar">
             <p class="text-start" style="padding-top: 2.7rem; padding-left: 6rem; padding-bottom: 1.4rem; margin-bottom: 0.2rem; opacity: 0.8;">
               <span class="fw-bold me-2">{{ selectedReviewInfo.user.nickname }}</span> | 
-              <span v-if="humanize(review.created_at) === humanize(review.updated_at)" class="ms-2">{{ humanize(selectedReviewInfo.created_at) }}</span>
-              <span v-else class="ms-2">{{ humanize(selectedReviewInfo.updated_at) }}</span>
+              <span v-if="humanize(now, review.created_at) === humanize(now, review.updated_at)" class="ms-2">{{ humanize(now, selectedReviewInfo.created_at) }}</span>
+              <span v-else class="ms-2">{{ humanize(now, selectedReviewInfo.updated_at) }}</span>
             </p>
             <vs-dropdown :vs-trigger-click="true" v-if="nickname === selectedReviewInfo.user.nickname" style="margin-left: 48.75rem; top: -0.7rem;">
               <a class="a-icon text-dark" style="opacity: 1;" href="#">
@@ -73,13 +73,13 @@
               <vs-dropdown-menu>
                 <vs-dropdown-item>
                   <div style="d-flex align-items-baseline">
-                    <span class="material-icons me-1" style="position: relative; top: 5px;">edit</span>
+                    <span class="material-icons me-1" style="position: relative; top: 5px;" @click="isReviewUpdating=true">edit</span>
                     <button @mousedown="currentReviewText=selectedReviewInfo.content" @click="isReviewUpdating=true">수정</button>
                   </div>
                 </vs-dropdown-item>
                 <vs-dropdown-item>
-                  <span class="material-icons me-1" style="position: relative; top: 5px;">delete</span>
-                  <button @click="deleteReview(selectedReview)">삭제</button>
+                  <span class="material-icons me-1" style="position: relative; top: 5px;" @click="deleteReview(selectedReview)">delete</span>
+                  <button @click="openReviewConfirm(selectedReview)">삭제</button>
                 </vs-dropdown-item>
               </vs-dropdown-menu>
             </vs-dropdown>
@@ -90,13 +90,13 @@
             <vs-input size="large" label-placeholder="리뷰 수정" class="inputx review-input text-start" style="margin: 2rem 10px 10px 10px; width: 1100px; word-break: break-all;"
               v-model="currentReviewText"  @keypress.enter="updateReview(selectedReview)" @blur="isReviewUpdating = ''"/> 
           </div>
-          <p v-if="!isReviewUpdating" class="text-start" style="margin: 3rem 10rem 0 10rem; padding-bottom: 3rem; word-break: break-all;">{{ selectedReviewInfo.content }}</p>
+          <p v-if="!isReviewUpdating" class="text-start" style="margin: 3rem 10rem 0 10rem; padding-bottom: 3rem; word-break: break-all;">{{ currentReviewText }}</p>
         </div>
         <!-- comments -->
         <!-- 댓글 생성 -->
       </div>
       <div style="background-color: rgba(255, 255, 255, 0.9); height: 65px; margin-top: 30px; padding: 10px; border-radius: 5px;">
-        <vs-input icon="mode_edit" class="comment-input input text-start ms-1" v-model="commentText" @keypress.enter="createComment"/>
+        <vs-input icon="mode_edit" class="comment-input input text-start ms-1" placeholder="댓글을 입력해보세요" v-model="commentText" @keypress.enter="createComment"/>
       </div>
       <div>
         <div v-for="(comment, idx) in comments" :key="idx" class="comment-container" style="background-color: rgba(255, 255, 255, 0.9); transition: 0.3s">
@@ -104,8 +104,8 @@
             <span class="material-icons" style="transform:rotate(180deg); margin-top: 0.5rem; margin-left: 0.5rem;">reply</span>
             <img v-if="SERVER_URL+comment.user.image === SERVER_URL+'null'" src="@/assets/default_profile.jpg" alt="Avatar">
             <img v-else :src="SERVER_URL+comment.user.image" alt="Avatar">
-            <p class="text-start"><span class="fw-bold me-2">{{ comment.user.nickname }}</span>|<span v-if="humanize(comment.created_at) === humanize(comment.updated_at)" class="ms-2">{{ humanize(comment.created_at) }}</span>
-              <span v-else class="ms-2">{{ humanize(selectedReviewInfo.updated_at) }}</span>
+            <p class="text-start"><span class="fw-bold me-2">{{ comment.user.nickname }}</span>|<span v-if="humanize(now, comment.created_at) === humanize(now, comment.updated_at)" class="ms-2">{{ humanize(now, comment.created_at) }}</span>
+              <span v-else class="ms-2">{{ humanize(now, selectedReviewInfo.updated_at) }}</span>
             </p>
             <vs-dropdown :vs-trigger-click="true" v-if="nickname === comment.user.nickname" style="margin-left: 50rem;">
               <a class="a-icon text-dark" style="opacity: 0.8;" href="#">
@@ -114,13 +114,13 @@
               <vs-dropdown-menu>
                 <vs-dropdown-item>
                   <div style="d-flex align-items-baseline">
-                    <span class="material-icons me-1" style="position: relative; top: 5px;">edit</span>
+                    <span class="material-icons me-1" style="position: relative; top: 5px;" @click="getComment(comment.content, idx)">edit</span>
                     <button @click="getComment(comment.content, idx)">수정</button>
                   </div>
                 </vs-dropdown-item>
                 <vs-dropdown-item>
-                  <span class="material-icons me-1" style="position: relative; top: 5px;">delete</span>
-                  <button @click="deleteComment(comment.id)">삭제</button>
+                  <span class="material-icons me-1" style="position: relative; top: 5px;" @click="deleteComment(comment.id)">delete</span>
+                  <button @click="openCommentConfirm(comment.id)">삭제</button>
                 </vs-dropdown-item>
               </vs-dropdown-menu>
             </vs-dropdown>
@@ -173,6 +173,10 @@ export default {
       SERVER_URL: SERVER.URL,
       review: {},
       isReviewUpdating: false,
+      activeConfirm:false,
+      deleteReviewPk: -1,
+      deleteCommentPk: -1,
+      now: new Date(),
     }
   },
   methods: {
@@ -244,15 +248,47 @@ export default {
         console.log(err)
       })
     },
-    humanize: function (date) {
+    humanize: function (now, date) {
       const moment = require('moment')
-      const created = moment(date).format('YY.MM.DD\u00A0\u00A0HH:MM')
-      return created
+      const dateData = new Date(date)
+      let r = now - dateData
+      if (parseInt(r) > 43200000) {
+        r = moment(dateData).format('YY.MM.DD\u00A0\u00A0HH:MM')
+      } else if (parseInt(r) >= 3600000) {
+        r = parseInt(parseInt(r) / 3600000).toString() + '시간 전'
+      } else if (parseInt(r) >= 60000) {
+        r = parseInt(parseInt(r) / 60000).toString() + '분 전'
+      } else {
+        r = '방금 전'
+      }
+      return r
+    },
+    // 리뷰 삭제 컨펌
+    openReviewConfirm(reviewPk) {
+      this.deleteReviewPk = reviewPk
+      this.$vs.dialog({
+        type:'confirm',
+        color: 'rgba(140, 100, 172)',
+        title: `삭제`,
+        text: '리뷰를 삭제하시겠습니까?',
+        accept:this.deleteReview
+      })
+    },
+    // 댓글 삭제 컨펌
+    openCommentConfirm(commentPk) {
+      this.deleteCommentPk = commentPk
+      this.$vs.dialog({
+        type:'confirm',
+        color: 'rgba(140, 100, 172)',
+        title: `삭제`,
+        text: '댓글을 삭제하시겠습니까?',
+        accept:this.deleteComment
+      })
     },
     // 리뷰 수정
     updateReview: function (reviewPk) {
-      const newReview = this.selectedReviewInfo.content
-      console.log(this.selectedReviewInfo.content)
+      const newReview = this.currentReviewText
+      this.now = new Date()
       axios({
         method: 'put',
         url: `${SERVER.URL}/api/v1/reviews/${reviewPk}/`,
@@ -264,26 +300,21 @@ export default {
       // 리뷰 갱신
       .then(() => {
         this.isReviewUpdating = false
-        this.currentReviewText = ''
       })
       .catch((err) => {
         console.log(err)
       })
     },
     // 리뷰 삭제 
-    deleteReview: function (reviewPk) {
+    deleteReview: function () {
       axios({
         method: 'delete',
-        url: `${SERVER.URL}/api/v1/reviews/${reviewPk}`,
+        url: `${SERVER.URL}/api/v1/reviews/${this.deleteReviewPk}`,
         headers: this.$store.getters.config,
       })
-      // db에서 삭제 후 Detail page로 이동
+      // db에서 삭제 후 Detail page로 이동(현재를 history에 남기지 않게 됨)
       .then(() => {
-        const moviePk = this.selectedMovie
-        this.$router.push({
-          name: 'Detail',
-          query: { moviePk }
-      })
+        this.$router.go(-1)
       })
       .catch(err => {
         console.log(err)
@@ -294,6 +325,7 @@ export default {
     },
     // 댓글 조회
     getComments: function () {
+      this.now = new Date()
       axios({
         method: 'get',
         url: `http://127.0.0.1:8000/api/v1/reviews/${this.$route.query.review}/comments/`,
@@ -306,6 +338,7 @@ export default {
     // 댓글 생성
     createComment: function () {
       const content = this.commentText
+      this.now = new Date()
       axios({
         method: 'post',
         url: `${SERVER.URL}/api/v1/reviews/${this.selectedReviewInfo.id}/comments/`,
@@ -331,6 +364,7 @@ export default {
     // 댓글 수정
     updateComment: function ($event, commentPk) {
       const newComment = $event.target.value
+      this.now = new Date()
       axios({
         method: 'put',
         url: `${SERVER.URL}/api/v1/comments/${commentPk}/`,
@@ -349,10 +383,11 @@ export default {
       })
     },
     // 댓글 제거
-    deleteComment: function (commentPk) {
+    deleteComment: function () {
+      this.now = new Date()
       axios({
         method: 'delete',
-        url: `${SERVER.URL}/api/v1/comments/${commentPk}`,
+        url: `${SERVER.URL}/api/v1/comments/${this.deleteCommentPk}`,
         headers: this.$store.getters.config,
       })
       .then(() => {

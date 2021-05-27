@@ -1,10 +1,16 @@
 <template>
   <div id='Detail'>
     <!-- 배경 -->
-    <h1 id='logo' @click="$router.push({ name: 'Main' })">MET<span style="color: crimson;">MIX</span>A</h1>
+    <h1 id='logo' @click="$router.push({ name: 'Main' })">MET<span style="color: rgba(140, 100, 172, 0.8);">MIX</span>A</h1>
     <img id="bg-backdrop" :src="this.selectedMovieInfo.backdrop_path" alt="" :style="{ width: windowWidth }">
     <div id="bg-cover" :style="{ width: windowWidth }"></div>
     <img id="poster" :src="this.selectedMovieInfo.poster_path" rounded alt="" style="width: 300px; border-radius: 7px;">
+    <div id="sideText">
+      <h1 style="margin-bottom: 2vh; color: rgba(140, 100, 172, 0.8); font-size: 3.2vh; font-family: 'Nanum Myeongjo', serif;">MIX</h1>
+      <p style="width: 20vh; font-size: 1.65vh;">같은 취향을 가진 사람들과</p>
+      <p style="width: 20vh; font-size: 1.65vh;">영화에 대한 감상을 나누며</p>
+      <p style="width: 20vh; font-size: 1.65vh;">생각을 섞는 공간</p>
+    </div>
     
     <div id="info-div">
       <h1 id="movie-title" class="text-white text-start">{{ this.selectedMovieInfo.title }}</h1>
@@ -68,6 +74,8 @@
               <!-- 너무 긴 리뷰가 적힐 경우 ...으로 축약 -->
               <span class="me-3">{{ review.user.nickname }}</span>
               <p class="m-0 text-truncate text-start fw-bold" style="font-size: 17px; opacity: 0.8;">{{ review.content }}</p>
+              <span v-if="checkNew(humanize(now, review.created_at))" class="badge rounded-pill bg-primary" style="font-size: 10px;">New</span>
+              <span v-if="review.comments_count > 4" class="badge rounded-pill bg-danger" style="margin-left: 10px; font-size: 10px;">Hot</span>
             </div>
 
             <!-- 본문 -->
@@ -77,8 +85,9 @@
                 <vs-avatar class="comment-button" :badge="review.comments_count" color="dark" icon="mode_comment" style="position: relative; top: 1.5rem; left: -0.2rem;" 
                   @mousedown="$router.push({ name: 'Comment', query: { movie: selectedMovie, review: review.id } })"/>
               </p>
-              <span v-if="humanize(review.created_at) === humanize(review.updated_at)" style="margin-right: 1.5rem;">작성: {{ humanize(review.created_at) }}</span>
-              <span v-else style="margin-right: 1.5rem;">수정: {{ humanize(review.updated_at) }}</span>
+              <span v-if="humanize(now, review.created_at) === humanize(now, review.updated_at)" style="margin-right: 1.5rem;">작성: {{ humanize(now, review.created_at) }}</span>
+              <span v-else style="margin-right: 1.5rem;">수정: {{ humanize(now, review.updated_at) }}</span>
+              <span></span>
             </div>
           </vs-collapse-item>
         </div>
@@ -114,13 +123,13 @@ export default {
       pageNum: 1,
       possiblePageNum: 2,
       SERVER_URL: SERVER.URL,
+      now: new Date(),
     }
   },
   methods: {
     // 리뷰 조회(인피니트 스크롤)
     getReviews: function () {
-      console.log('호출')
-      console.log(this.reviews)
+      this.now = new Date()
       axios({
         method: 'get',
         url: `http://127.0.0.1:8000/api/v1/movies/${this.selectedMovie}/reviews/`,
@@ -143,8 +152,6 @@ export default {
       const {scrollTop, clientHeight, scrollHeight} = document.documentElement
       if (scrollHeight - scrollTop <= clientHeight) {
         if (this.pageNum <= this.possiblePageNum) {
-          console.log(this.name)
-          console.log('dd')
           this.getReviews()
         }
       }
@@ -152,6 +159,7 @@ export default {
     // 리뷰 생성
     createReview: function () {
       const content = this.reviewText
+      this.now = new Date()
       axios({
         method: 'post',
         url: `${SERVER.URL}/api/v1/movies/${this.selectedMovie}/reviews/`,
@@ -170,6 +178,7 @@ export default {
     },
     // 리뷰 제거
     deleteReview: function (reviewPk, idx) {
+      this.now = new Date()
       console.log(reviewPk)
       axios({
         method: 'delete',
@@ -190,7 +199,7 @@ export default {
     // 별점 주기
     giveRate: function () {
       const rate = this.currentRate
-      this.$vs.notify({title:'평점 후원!',text: `${this.nickname}님! ${this.currentRate}점 후원 감사합니다! 😘`,color:'warning',icon:'star'})
+      this.$vs.notify({title:`${this.nickname}님! ${this.currentRate}점 후원 감사합니다! 😘`, text: '추천 영화에 반영됩니다 💘' ,color:'warning',icon:'star'})
       // 별점을 이미 줬으면 put
       if (this.originalRate) {
         axios({
@@ -256,13 +265,28 @@ export default {
         console.log(err)
       })
     },
-    humanize: function (date) {
+    humanize: function (now, date) {
       const moment = require('moment')
-      const now = new Date()
-      console.log(moment(now).format('YY.MM.DD\u00A0\u00A0HH:MM'))
-      const created = moment(date).format('YY.MM.DD\u00A0\u00A0HH:MM')
-      return created
-    }
+      const dateData = new Date(date)
+      let r = now - dateData
+      if (parseInt(r) > 43200000) {
+        r = moment(dateData).format('YY.MM.DD\u00A0\u00A0HH:MM')
+      } else if (parseInt(r) >= 3600000) {
+        r = parseInt(parseInt(r) / 3600000).toString() + '시간 전'
+      } else if (parseInt(r) >= 60000) {
+        r = parseInt(parseInt(r) / 60000).toString() + '분 전'
+      } else {
+        r = '방금 전'
+      }
+      return r
+    },
+    checkNew: function (time) {
+      if (time.includes('전')) {
+        return true
+      } else {
+        return false
+      }
+    },
   },
   // main page에서 카드를 눌렀을 때 detail page로 이동된 것
   // detail page가 실행되자마자 영화정보, 영화에 대한 리뷰, 유저가 준 rating, 
@@ -396,6 +420,39 @@ export default {
   position: absolute;
   top: 5rem;
   left: 23.5rem; 
+}
+
+#sideText {
+  color: whitesmoke;
+  font-size: 1.5rem;
+  position: fixed;
+  top: 20vh;
+  left: 2vw;
+  opacity: 0;
+  animation-name: slideSide;
+  animation-duration: 6s;
+}
+
+#sidetext > h1 {
+  font-family: 'Nanum Myeongjo', serif;
+}
+
+@keyframes slideSide {
+  0% {
+    left: -10vw;
+    opacity: 0;
+  }
+  20% {
+    left: 1vw;
+    opacity: 1;
+  }
+  80% {
+    left: 1vw;
+    opacity: 1;
+  }
+  100% {
+    left: -5vw;
+  }
 }
 
 #movie-title{

@@ -1,6 +1,12 @@
 <template>
   <div id="profile_main">
-    <h1 id='logo' @click="$router.push({ name: 'Main' })">METMIXA</h1>
+    <h1 id='logo' @click="$router.push({ name: 'Main' })">METMIX<span style="color: rgba(140, 100, 172, 0.8);">A</span></h1>
+    <div id="sideText">
+      <h1 style="margin-bottom: 2vh; color: rgba(140, 100, 172, 0.8); font-size: 3.2vh; font-family: 'Nanum Myeongjo', serif;">A</h1>
+      <p style="width: 20vh; font-size: 1.65vh;">내가 좋아하는 영화를 담고</p>
+      <p style="width: 20vh; font-size: 1.65vh;">포토티켓을 감상하는</p>
+      <p style="width: 20vh; font-size: 1.65vh;">나만의 프라이빗 공간</p>
+    </div>
     <!-- 유저 이름, 닉네임, 사진 -->
     <UserInfo
     class="d-block"
@@ -106,6 +112,39 @@ export default {
   opacity: 0.7;
   font-size: 2rem;
   cursor: pointer;
+}
+
+#sideText {
+  color: whitesmoke;
+  font-size: 1.5rem;
+  position: fixed;
+  top: 20vh;
+  left: 2vw;
+  opacity: 0;
+  animation-name: slideSide;
+  animation-duration: 6s;
+}
+
+#sidetext > h1 {
+  font-family: 'Nanum Myeongjo', serif;
+}
+
+@keyframes slideSide {
+  0% {
+    left: -10vw;
+    opacity: 0;
+  }
+  20% {
+    left: 1vw;
+    opacity: 1;
+  }
+  80% {
+    left: 1vw;
+    opacity: 1;
+  }
+  100% {
+    left: -5vw;
+  }
 }
 
 #masonry_layer {

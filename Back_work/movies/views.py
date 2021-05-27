@@ -146,6 +146,7 @@ def review_detail(request, review_pk):
             return Response(data, status=status.HTTP_204_NO_CONTENT)
         # 리뷰 수정
         elif request.method == 'PUT':
+            print(request.data)
             serializer = ReviewSerializer(review, data=request.data)
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
@@ -279,7 +280,7 @@ def photo_ticket(request, movie_pk):
 # 장르
 @api_view(['POST'])
 def get_genres_db(request):
-    if request.user.username == 'admin':
+    if request.data.get('nickname') == 'admin':
         # API키는 공개되어서는 안되는 내용이다. .env파일에 넣어두고 decouple을 사용해 꺼내온다.
         API_KEY = config('API_KEY')
         # TMDB의 API를 사용해 한국의 인기있는 영화들을 한국어로 가져온다.
@@ -300,9 +301,9 @@ def get_genres_db(request):
 # 영화
 @api_view(['POST'])
 def get_movies_db(request):
-    if request.user.username == 'admin':
+    if request.data.get('nickname') == 'admin':
         API_KEY = config('API_KEY')
-        for page in range(1, 11):
+        for page in range(1, 21):
             url = f'https://api.themoviedb.org/3/movie/popular?api_key={API_KEY}&page={page}&region=KR&language=ko'
             req = requests.get(url).json()
             for data in req.get('results'):
@@ -363,7 +364,7 @@ def get_movies_db(request):
 # 감독, 배우
 @api_view(['POST'])
 def get_casts_db(request):
-    if request.user.username == 'admin':
+    if request.data.get('nickname') == 'admin':
         API_KEY = config('API_KEY')
         movies = get_list_or_404(Movie)
         for movie in movies:

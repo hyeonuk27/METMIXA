@@ -4,7 +4,7 @@
       <span class="avatar">
         <el-tooltip content="하이❤" placement="right" :offset="-40" effect="light">
           <a data-bs-toggle="modal" data-bs-target="#profileModal">
-            <img v-if="image === SERVER_URL+'null'" src="@/assets/default_profile.jpg" alt="" />
+            <img v-if="image === SERVER_URL+'null'" src="@/assets/default_profile.jpg" alt=""/>
             <img v-else :src="image" alt="" />
           </a>
         </el-tooltip>

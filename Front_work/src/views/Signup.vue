@@ -151,7 +151,7 @@ export default {
   background-color: black;
   animation: fadeout 1s;
   animation-fill-mode: forwards;
-  animation-delay: 1s;
+  animation-delay: 0.6s;
 }
 
 @keyframes fadeout {

@@ -127,7 +127,7 @@ export default {
   background-color: black;
   animation: fadeout 3s;
   animation-fill-mode: forwards;
-  animation-delay: 2s;
+  animation-delay: 1.75s;
 }
 
 @keyframes fadeout {
@@ -143,8 +143,8 @@ export default {
 
 .text-slide {
   animation-name: slide;
-  animation-delay: 2s;
-  animation-duration:2s;
+  animation-delay: 1.75s;
+  animation-duration: 2s;
   animation-duration: leaner;
   animation-fill-mode: forwards;
 }

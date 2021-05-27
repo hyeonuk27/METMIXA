@@ -1,6 +1,7 @@
 <template>
   <div id='Main'>
-    <h1 id='logo'>METMIXA</h1>
+    <!-- 좌상단 엘리먼트 -->
+    <h1 id='logo'><span style="color: rgba(140, 100, 172, 0.8);">MET</span>MIXA</h1>
     <vs-select
       class="selectMode"
       v-model="mode"
@@ -32,6 +33,13 @@
     <span v-if="selectedMode === 'genre'" class="dif-genre" @click="genreMode = true">
       <span class="material-icons" style="position: relative; top: 5px; margin-right: 4px;">theaters</span>다른 장르
     </span>
+    <div id="sideText">
+      <h1 style="margin-bottom: 2vh; color: rgba(140, 100, 172, 0.8); font-size: 3.2vh; font-family: 'Nanum Myeongjo', serif;">MEET</h1>
+      <p style="width: 11vh; font-size: 1.65vh;">내게 맞는</p>
+      <p style="width: 11vh; font-size: 1.65vh;">영화와</p>
+      <p style="width: 11vh; font-size: 1.65vh;">만나는 공간</p>
+    </div>
+    <!-- 본문 -->
     <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0;" @click="uncheck"></div>
     <iframe width="1920" height="1080" :src="videoURI" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     <input type="checkbox" id="my-menu">
@@ -43,11 +51,20 @@
       <div id="menu1" class="menu mb-3 text-end" @click="$router.push({ name: 'Profile' })">
         <span>내 프로필</span>
       </div>
-      <div class="menu text-end mb-3" @click="logout">
+      <div class="menu text-end mb-5" @click="openLogoutConfirm">
         <span>로그아웃</span>
       </div>
-      <div v-if="nickname === '어드민'" class="menu text-end">
+      <div v-if="nickname === 'admin'" class="menu mb-3  text-end">
         <a href="http://127.0.0.1:8000/admin" class="text-decoration-none">관리자 페이지</a>
+      </div>
+      <div v-if="nickname === 'admin'" class="menu mb-3 text-end">
+        <a @click="dataBaseConstruct('genres')" class="text-decoration-none ">장르 DB 구축</a>
+      </div>
+      <div v-if="nickname === 'admin'" class="menu mb-3 text-end">
+        <a @click="dataBaseConstruct('movies')" class="text-decoration-none">영화 DB 구축</a>
+      </div>
+      <div v-if="nickname === 'admin'" class="menu mb-3 text-end">
+        <a @click="dataBaseConstruct('casts')" class="text-decoration-none">캐스트 DB 구축</a>
       </div>
     </div>
     <MovieList :movieList="movieList" @mousedown.native="uncheck"/>
@@ -203,16 +220,41 @@ export default {
         this.genreMode = false
         this.fetchVideos(this.movieList[0].tmdb_id)
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err)
         this.$vs.notify({title:'이런!',text:'영화가 아직 없어요😢  업로드를 기대해주세요.',color: 'rgba(0, 0, 0, 0.8)',position:'top-center'})
       })
     },
+    // 로그아웃 컨펌
+    openLogoutConfirm: function () {
+      this.$vs.dialog({
+        type:'confirm',
+        color: 'rgba(140, 100, 172)',
+        title: `로그아웃`,
+        text: '충분히 즐거우셨나요?',
+        accept:this.logout
+      })
+    },
+    dataBaseConstruct: function (table) {
+      axios({
+        method: 'post',
+        url: `http://127.0.0.1:8000/api/v1/db/${table}/`,
+        data: {
+          nickname: this.nickname,
+        },
+      })
+      .then(() => {
+        console.log('완료')
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    }
   },
   computed: {
     ...mapState([
-      'image',
       'nickname',
+      'image',
     ]),
     ...mapGetters([
       'config',
@@ -297,7 +339,18 @@ input[type=checkbox]:checked + label + div {
   left: 1rem;
   color: #f1f1f1;
   opacity: 0.7;
-  font-size: 3.2rem;
+  font-size: 2rem;
+  animation: transform 1.5s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes transform {
+    from {
+        font-size: 2rem;
+    }
+    to {
+        font-size: 3.2rem;
+    }
 }
 
 .con-select {
@@ -380,6 +433,39 @@ input[type=checkbox]:checked + label + div {
   top: 8rem;
   left: 1.2rem;
   cursor: pointer;
+}
+
+#sideText {
+  color: whitesmoke;
+  font-size: 1.5rem;
+  position: fixed;
+  top: 20vh;
+  left: 2vw;
+  opacity: 0;
+  animation-name: slideSide;
+  animation-duration: 6s;
+}
+
+#sidetext > h1 {
+  font-family: 'Nanum Myeongjo', serif;
+}
+
+@keyframes slideSide {
+  0% {
+    left: -10vw;
+    opacity: 0;
+  }
+  20% {
+    left: 1vw;
+    opacity: 1;
+  }
+  80% {
+    left: 1vw;
+    opacity: 1;
+  }
+  100% {
+    left: -5vw;
+  }
 }
 </style>
 
