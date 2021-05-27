@@ -183,7 +183,7 @@ export default {
     // 별점 주기
     giveRate: function () {
       const rate = this.currentRate
-      this.$vs.notify({title:'평점 후원!',text: `${this.nickname}님! ${this.currentRate}점 후원 감사합니다! 😘`,color:'warning',icon:'star'})
+      this.$vs.notify({title:`${this.nickname}님! ${this.currentRate}점 후원 감사합니다! 😘`, text: '추천 영화에 반영됩니다 💘',color:'warning',icon:'star'})
       // 별점을 이미 줬으면 put
       if (this.originalRate) {
         axios({

@@ -100,7 +100,6 @@
 import axios from 'axios'
 import SERVER from '@/api/drf.js'
 import { mapState } from 'vuex'
-import swal from 'sweetalert'
 
 export default {
   name: 'Detail',
@@ -174,26 +173,6 @@ export default {
       })
       .catch(err => {
         console.log(err)
-      })
-    },
-    // 리뷰 제거
-    deleteReview: function (reviewPk, idx) {
-      this.now = new Date()
-      console.log(reviewPk)
-      axios({
-        method: 'delete',
-        url: `${SERVER.URL}/api/v1/reviews/${reviewPk}`,
-        headers: this.$store.getters.config,
-      })
-      // db에서 삭제 후 vue에서 삭제
-      .then(() => {
-        this.reviews.splice(idx, 1)
-      })
-      .catch(err => {
-        console.log(err)
-        swal ("자신의 리뷰만 지워주세요!", {
-          dangerMode: true,
-        })
       })
     },
     // 별점 주기
