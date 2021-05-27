@@ -86,6 +86,11 @@ export default {
   updated: function () {
     this.$refs.treeExplorer.goSlide(this.$refs.treeExplorer.currentIndex)
   },
+  watch: {
+    movieList: function () {
+      this.$refs.treeExplorer.goSlide(0)
+    }
+  }
 }
 </script>
 

@@ -205,7 +205,6 @@ export default {
     },
     // 장르별 조회
     genreSubmit: function (index) {
-      console.log(this.genreId[index])
       axios({
         method: 'get',
         url: 'http://127.0.0.1:8000/api/v1/movies/',
