@@ -31,10 +31,9 @@ User = get_user_model()
 def movie_list(request):
     mode = request.GET.get('mode')
     # 추천 0. mode - 알고리즘
-    # 새로고침 버튼 필요
     if mode == 'algorithm':
         weight = []
-        # 장르가 19개 있다.
+        # 19가지 장르의 pk
         for id in range(1, 20):
             genre_weight = RecommendAlgoScore.objects.filter(user__pk=request.user.pk, genre__pk=id).aggregate(Sum('rate'))['rate__sum']
             weight.append(genre_weight if genre_weight else 1)
