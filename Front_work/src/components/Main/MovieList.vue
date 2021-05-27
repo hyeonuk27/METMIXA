@@ -7,6 +7,7 @@
       :space="270"
       :count="movieList.length"
       :display="7"
+      :border="0"
       @after-slide-change="setSelectedMovieId"
       @before-slide-change="play"
       >
@@ -19,7 +20,6 @@
     <div id="card-cover">
       <h6 style="color: white; padding: 10px; margin-top: 40px;">{{title}}</h6>
       <h6 style="color: white;">평점 {{ vote_average }}</h6>
-      <!-- {{ movieList[selectedMovieId].tmdb_id }} -->
       <button id="detail-button" @click="goDetail">상세정보<i class="fas fa-chevron-right ms-2" style="font-size: 15px;"></i></button>
     </div>
   </div>
@@ -108,7 +108,7 @@ export default {
 #card-cover:not(button, h2, h6) {
   position: absolute;
   /* left: 35%; */
-  margin-top: 1.3rem;
+  margin-top: 1.25rem;
   width: 182px;
   height: 270px;
   background-color: black;
