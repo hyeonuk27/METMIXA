@@ -241,7 +241,7 @@ def rate(request, movie_pk):
 @authentication_classes([JSONWebTokenAuthentication])
 @permission_classes([IsAuthenticated])
 def photo_ticket_list(request):
-    photo_tickets = PhotoTicket.objects.filter(user__pk=request.user.pk)
+    photo_tickets = PhotoTicket.objects.filter(user__pk=request.user.pk).order_by('-pk')
     paginator = Paginator(photo_tickets, 12)
     page_num = request.GET.get('page_num')
     photo_tickets = paginator.get_page(page_num)
