@@ -18,7 +18,7 @@
 
 + 로그인 & 회원가입
 
-![login, signup](README.assets/login, signup.gif)
+![login_signup](README.assets/login_signup.gif)
 
 + 메인 페이지
 
@@ -30,15 +30,15 @@
 
 + 영화 상세 페이지 - 평점 & 포토카드 추가
 
-![star,heart](README.assets/star,heart.gif)
+![star_heart](README.assets/star_heart.gif)
 
 + 영화 상세 페이지 - 리뷰 & 댓글
 
-![comment, review](README.assets/comment, review.gif)
+![comment_review](README.assets/comment_review.gif)
 
 + 프로필 페이지
 
-![my page](README.assets/my page.gif)
+![my_page](README.assets/my_page.gif)
 
 + 관리자 페이지
 
