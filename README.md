@@ -16,21 +16,37 @@
 
 # 결과물 Preview
 
-![image1](README.assets/image1.png)
++ 로그인 & 회원가입
 
-![image2](README.assets/image2.png)
+![login, signup](README.assets/login, signup.gif)
 
-![image3](README.assets/image3.png)
++ 메인 페이지
 
-![image4](README.assets/image4.png)
+![main](README.assets/main.gif)
 
-![image5](README.assets/image5.png)
++ 메인 페이지 - 조회 & 검색
 
-![image6](README.assets/image6.png)
+![search](README.assets/search.gif)
 
-![image7](README.assets/image7.png)
++ 영화 상세 페이지 - 평점 & 포토카드 추가
 
-![image8](README.assets/image8.png)
+![star,heart](README.assets/star,heart.gif)
+
++ 영화 상세 페이지 - 리뷰 & 댓글
+
+![comment, review](README.assets/comment, review.gif)
+
++ 프로필 페이지
+
+![my page](README.assets/my page.gif)
+
++ 관리자 페이지
+
+![admin](README.assets/admin.gif)
+
++ 로그아웃
+
+![logout](README.assets/logout.gif)
 
 <br/>
 
@@ -64,7 +80,7 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-+ vur
++ vue
 
 ```
 npm i
@@ -161,9 +177,7 @@ npm run serve
 - 인기도, 평점 업데이트
     - `popurality`, `tmdb_vote_sum`, `tmdb_vote_cnt` 필드만 업데이트
 
-        updated tmdb 총점 +  our 총점
-        —————————————————
-        updated tmdb 개수 + our 개수
+        + 평점 계산 = (updated tmdb 총점 +  our 총점) / (updated tmdb 개수 + our 개수)
 
 <br/>
 
@@ -719,8 +733,8 @@ humanize: function (now, date) {
   + 이 덕분에 결국 우리는 프로젝트 내내 REST API 작업에서도, API를 사용하는 작업에서도 쉽게 진행할 수 있었다.
 + 데이터 구조를 짜고 아이디어를 설계하는 과정에 있어서 가장 중요한 것은 **의사소통**과 **협업 마인드**였다.
   + 다행히 우리 팀원들은 서로의 의견을 **경청**하고 **수용**하며 순조롭게 프로젝트를 진행했다.
-  + 특히, 나는 사소한 부분도 디테일을 따져가며 **'이런 부분을 이렇게 짠다면 저쪽에서 어떠한 작업이 필요한데 괜찮을까요?'**라는 질문을 끊임없이 던지고 생각하며 우리 프로젝트의 목표와 가능성 사이에서 조율을 많이 한 것 같다.
-  + 내가 프로젝트를 진행하면서 가장 중요하게 생각하는 것 중 하나는 **'우리의 머리 속에 똑같은 그림이 그려지고 있는가'**다. 똑같은 그림이 아니라면 작업을 하는 데에 있어서도 문제가 되지만 작업을 완료한 후에도 불만을 가지는 팀원들이 생기게 되기 마련이다. 이 때문에 코딩 작업을 하면서 '괜찮으신가요?', '이 부분 한 번 봐주세요'를 수없이 반복한 것 같다.
+  + 특히, 나는 사소한 부분도 디테일을 따져가며 '이런 부분을 이렇게 짠다면 저쪽에서 어떠한 작업이 필요한데 괜찮을까요?'라는 질문을 끊임없이 던지고 생각하며 우리 프로젝트의 목표와 가능성 사이에서 조율을 많이 한 것 같다.
+  + 내가 프로젝트를 진행하면서 가장 중요하게 생각하는 것 중 하나는 '우리의 머리 속에 똑같은 그림이 그려지고 있는가'다. 똑같은 그림이 아니라면 작업을 하는 데에 있어서도 문제가 되지만 작업을 완료한 후에도 불만을 가지는 팀원들이 생기게 되기 마련이다. 이 때문에 코딩 작업을 하면서 '괜찮으신가요?', '이 부분 한 번 봐주세요'를 수없이 반복한 것 같다.
 + 규모가 꽤 있다보니 변수와 함수를 정리하기가 어려웠고, 알 수 없는 로직에 의한 에러를 해결해야 하는 경우가 많았다.
   + 최대한 전체 구조를 머리 속에 그리며 문제를 해결했다.
   + 이번 프로젝트로 **공식문서의 위대함**을 느꼈다.
