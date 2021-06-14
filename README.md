@@ -1,6 +1,6 @@
 # 🏆Final pjt
 
-> Django REST API와 Vue.js를 활용한 영화 추천 및 커뮤니티 사이트
+> Django REST Framework와 Vue.js를 활용한 영화 추천 및 커뮤니티 사이트
 >
 > SSAFY 상반기 관통 최종 프로젝트 **최우수상** 수상작
 
